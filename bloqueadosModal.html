@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Usuarios Bloqueados</title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: white; }
+    .navbar { background-color: #db4437; padding: 15px; text-align: center; color: white; font-size: 20px; font-weight: bold; }
+    .container { padding: 20px; }
+    .user { display: flex; align-items: center; justify-content: space-between; padding: 10px; border-bottom: 1px solid #ddd; }
+    .user-info { display: flex; align-items: center; }
+    .user-info img { width: 50px; height: 50px; border-radius: 50%; margin-right: 10px; }
+    .user-info span { font-size: 18px; }
+    .btn { padding: 5px 15px; border: none; cursor: pointer; border-radius: 5px; font-size: 14px; color: white; transition: 0.3s; }
+    .btn-danger { background-color: #db4437; }
+    .btn-primary { background-color: #1e90ff; }
+    .btn-warning { background-color: orange; }
+  </style>
+</head>
+<body>
+  <div class="navbar">Usuarios Bloqueados</div>
+  <div class="container" id="blockedContainer">
+    <p>Cargando bloqueados...</p>
+  </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  cargarBloqueados();
+});
+
+function cargarBloqueados() {
+  const email = localStorage.getItem('email');
+  fetch('http://localhost:5000/api/perfil/bloqueados', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email })
+  })
+  .then(response => response.json())
+  .then(data => {
+    const container = document.getElementById('blockedContainer');
+    container.innerHTML = '';
+
+    if (data.success && data.bloqueados.length > 0) {
+      data.bloqueados.forEach(user => {
+        const userElement = document.createElement('div');
+        userElement.classList.add('user');
+
+        const userInfo = document.createElement('div');
+        userInfo.classList.add('user-info');
+        userInfo.innerHTML = `<img src="${user.fotoPerfil || 'img/perfil.jpg'}" alt="Foto"><span>${user.username}</span>`;
+
+        const button = document.createElement('button');
+        button.classList.add('btn', 'btn-danger');
+        button.textContent = "Desbloquear";
+        button.onclick = () => desbloquearUsuario(user, button);
+
+        userElement.appendChild(userInfo);
+        userElement.appendChild(button);
+        container.appendChild(userElement);
+      });
+    } else {
+      container.innerHTML = '<p>No has bloqueado a nadie.</p>';
+    }
+  })
+  .catch(error => console.error('Error al cargar bloqueados:', error));
+}
+
+function desbloquearUsuario(user, button) {
+  fetch('http://localhost:5000/api/perfil/desbloquear', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: localStorage.getItem('email'), desbloqueadoEmail: user.email })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      console.log(`Usuario ${user.username} desbloqueado`);
+
+      // Configurar el nuevo estado del botón
+      button.textContent = user.cuentaPrivada ? "Mandar Solicitud" : "Seguir";
+      button.classList.remove('btn-danger');
+      button.classList.add('btn-primary');
+
+      // Asociar el evento correctamente
+      button.onclick = () => mandarSolicitud(user, button);
+    }
+  })
+  .catch(error => console.error('Error al desbloquear usuario:', error));
+}
+
+function mandarSolicitud(user, button) {
+  console.log(`Mandando solicitud a: ${user.username}`);
+
+  // Si la cuenta es pública, agregar directamente como amigo
+  const endpoint = user.cuentaPrivada
+    ? "http://localhost:5000/api/perfil/mandar-solicitud"
+    : "http://localhost:5000/api/perfil/agregar-amigo";
+
+  fetch(endpoint, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: localStorage.getItem("email"), amigoEmail: user.email })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      console.log(`Solicitud enviada/agregado a amigo: ${user.username}`);
+
+      if (user.cuentaPrivada) {
+        button.textContent = "Cancelar Solicitud";
+        button.classList.remove("btn-primary");
+        button.classList.add("btn-warning");
+        button.onclick = () => cancelarSolicitud(user, button);
+      } else {
+        button.textContent = "Dejar de seguir";
+        button.classList.remove("btn-primary");
+        button.classList.add("btn-danger");
+        button.onclick = () => dejarDeSeguir(user, button);
+      }
+    } else {
+      console.error(`Error al mandar solicitud: ${data.message}`);
+    }
+  })
+  .catch(error => console.error("Error al mandar solicitud:", error));
+}
+
+
+function cancelarSolicitud(user, button) {
+  console.log(`Cancelando solicitud a: ${user.username}`);
+
+  fetch('http://localhost:5000/api/perfil/cancelar-solicitud', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: localStorage.getItem('email'), amigoEmail: user.email })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      console.log(`Solicitud cancelada para: ${user.username}`);
+
+      button.textContent = "Mandar Solicitud";
+      button.classList.remove('btn-warning');
+      button.classList.add('btn-primary');
+      button.onclick = () => mandarSolicitud(user, button);
+    }
+  })
+  .catch(error => console.error('Error al cancelar solicitud:', error));
+}
+
+function dejarDeSeguir(user, button) {
+  console.log(`Dejando de seguir a: ${user.username}`);
+
+  fetch("http://localhost:5000/api/perfil/eliminar-amigo-unilateral", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: localStorage.getItem("email"), amigoEmail: user.email })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      console.log(`Dejaste de seguir a: ${user.username}`);
+
+      // Cambiar el botón de nuevo a "Seguir"
+      button.textContent = user.cuentaPrivada ? "Mandar Solicitud" : "Seguir";
+      button.classList.remove("btn-danger");
+      button.classList.add("btn-primary");
+      button.onclick = () => mandarSolicitud(user, button);
+    } else {
+      console.error(`Error al dejar de seguir: ${data.message}`);
+    }
+  })
+  .catch(error => console.error("Error al dejar de seguir usuario:", error));
+}
+
+</script>
+</body>
+</html>

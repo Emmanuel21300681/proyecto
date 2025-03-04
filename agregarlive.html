@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nuevo LIVE</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap");
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(to bottom, #f0f0f0, #ffffff);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .form-container {
+      background: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 600px;
+    }
+
+    .form-container h1 {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      text-align: center;
+      color: #333;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 5px;
+      color: #555;
+    }
+
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      outline: none;
+      transition: border-color 0.3s ease;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      border-color: #db4437;
+    }
+
+    .form-group textarea {
+      resize: none;
+      height: 100px;
+    }
+
+    .form-group .add-tag {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .form-group .add-tag button {
+      padding: 8px 12px;
+      background-color: #db4437;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .form-group .add-tag button:hover {
+      background-color: #b33c2c;
+    }
+
+    .form-group .file-input-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0 auto;
+      width: 100%;
+      max-width: 300px;
+      height: 150px;
+      background-color: #e0e0e0;
+      border: 2px dashed #ccc;
+      border-radius: 5px;
+      position: relative;
+    }
+
+    .form-group .file-input-container label {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #db4437;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      font-size: 24px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .form-group .file-input-container label:hover {
+      background-color: #b33c2c;
+    }
+
+    .form-group .file-input-container input {
+      display: none;
+    }
+
+    .slider-container {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .button-container {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .button-container button {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .button-container .instant-live {
+      background-color: #007bff;
+    }
+
+    .button-container .instant-live:hover {
+      background-color: #0056b3;
+    }
+
+    .button-container .share-live {
+      background-color: #28a745;
+    }
+
+    .button-container .share-live:hover {
+      background-color: #218838;
+    }
+
+    .time-options {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .time-options label {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.tag {
+  background-color: #db4437; 
+  color: white; 
+  padding: 5px 10px;
+  border-radius: 5px; 
+  display: flex;
+  align-items: center;
+  gap: 5px; 
+  font-size: 14px; 
+}
+
+.tag button {
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 12px; 
+  padding: 0;
+  margin: 0;
+}
+
+.tag button:hover {
+  color: #ffcccc; 
+}
+
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <h1>Nuevo LIVE</h1>
+    <form id="live-form">
+      <div class="form-group">
+        <label for="live-name">Nombre del LIVE</label>
+        <input type="text" id="live-name" name="live-name" placeholder="Ingresa el nombre del LIVE" required>
+      </div>
+
+      <div class="form-group">
+        <label for="live-description">Descripción</label>
+        <textarea id="live-description" name="live-description" placeholder="Ingresa la descripción del LIVE" required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="live-link">Enlace</label>
+        <input type="text" id="live-link" name="live-link" placeholder="Ingresa el enlace del LIVE" required>
+      </div>
+
+      <div class="form-group">
+        <label for="live-date">Fecha</label>
+        <input type="date" id="live-date" name="live-date" required>
+      </div>
+
+      <div class="form-group">
+        <label for="live-time">Hora</label>
+        <input type="time" id="live-time" name="live-time" required>
+      </div>
+
+      <div class="form-group">
+        <label for="duracion">Duración</label>
+        <input type="number" id="duracion" name="duracion" placeholder="Ingresa la duración" required>
+        <div class="time-options">
+          <label>
+            <input type="radio" name="time-unit" value="hours"> Horas
+          </label>
+          <label>
+            <input type="radio" name="time-unit" value="minutes"> Minutos
+          </label>
+          <label>
+            <input type="radio" name="time-unit" value="undefined"> Indefinido
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Etiquetas</label>
+        <div class="add-tag">
+          <input type="text" id="live-tags" name="live-tags" placeholder="Añadir etiqueta">
+          <button type="button" id="add-tag">+</button>
+        </div>
+        <div class="tags-container" id="tags-container"></div>
+      </div>
+
+      <div class="form-group">
+        <label for="live-image">Imagen</label>
+        <div class="file-input-container">
+          <label for="live-image">+</label>
+          <input type="file" id="live-image" name="live-image" accept="image/*">
+        </div>
+      </div>
+
+      <div class="slider-container">
+        <label for="add-to-calendar" class="form-label">Agregar al calendario</label>
+        <div class="form-check form-switch d-flex justify-content-center">
+          <input class="form-check-input" type="checkbox" id="add-to-calendar" name="add-to-calendar">
+        </div>
+      </div>
+
+      <div class="button-container">
+        <button type="button" class="instant-live">LIVE Instantáneo</button>
+        <button type="submit" class="share-live">Compartir LIVE</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const duracionInput = document.getElementById('duracion');
+      const timeUnitRadios = document.querySelectorAll('input[name="time-unit"]');
+
+      timeUnitRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+          if (radio.value === "undefined") {
+            duracionInput.disabled = true;
+            duracionInput.value = ""; // Limpiar el valor del campo
+          } else {
+            duracionInput.disabled = false;
+          }
+        });
+      });
+    });
+    const liveImageInput = document.getElementById('live-image');
+    const fileInputContainer = document.querySelector('.file-input-container');
+    const addTagButton = document.getElementById('add-tag');
+    const tagsContainer = document.getElementById('tags-container');
+    const liveForm = document.getElementById('live-form');
+    const duracionInput = document.getElementById('duracion');
+    const timeUnitRadios = document.querySelectorAll('input[name="time-unit"]');
+    let etiquetas = [];
+  
+    // Manejar la subida de la imagen
+    liveImageInput.addEventListener('change', function (event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          fileInputContainer.style.backgroundImage = `url('${e.target.result}')`;
+          fileInputContainer.style.backgroundSize = 'cover';
+          fileInputContainer.style.backgroundPosition = 'center';
+          fileInputContainer.style.border = 'none';
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  
+    // Manejar la adición de etiquetas
+    addTagButton.addEventListener('click', () => {
+      const tagInput = document.getElementById('live-tags');
+      const tagValue = tagInput.value.trim();
+      if (tagValue && !etiquetas.includes(tagValue)) {
+        etiquetas.push(tagValue);
+        actualizarEtiquetas();
+        tagInput.value = "";
+      }
+    });
+  
+    
+function actualizarEtiquetas() {
+  const tagsContainer = document.getElementById("tags-container");
+  tagsContainer.innerHTML = ""; 
+  etiquetas.forEach(tag => {
+    const tagElement = document.createElement("div");
+    tagElement.classList.add("tag"); 
+    tagElement.innerHTML = `${tag} <button onclick="eliminarEtiqueta('${tag}')">x</button>`;
+    tagsContainer.appendChild(tagElement);
+  });
+}
+  
+    
+    function eliminarEtiqueta(tag) {
+      etiquetas = etiquetas.filter(t => t !== tag);
+      actualizarEtiquetas();
+    }
+  
+    
+    timeUnitRadios.forEach(radio => {
+      radio.addEventListener('change', () => {
+        if (radio.value === "indefinido") {
+          duracionInput.disabled = true;
+          duracionInput.value = "";
+        } else {
+          duracionInput.disabled = false;
+        }
+      });
+    });
+  
+    
+    liveForm.addEventListener('submit', async function (event) {
+      event.preventDefault();
+      await crearLive(false); 
+    });
+  
+    
+    document.querySelector('.instant-live').addEventListener('click', async function () {
+      await crearLive(true); 
+    });
+  
+    async function crearLive(esInstantaneo) {
+  const email = localStorage.getItem('email');
+  if (!email) {
+    alert('Usuario no autenticado.');
+    return;
+  }
+
+  try {
+    const nombre = document.getElementById('live-name').value;
+    const descripcion = document.getElementById('live-description').value;
+    const enlace = document.getElementById('live-link').value;
+    const fecha = esInstantaneo ? new Date().toISOString().split('T')[0] : document.getElementById('live-date').value;
+    const hora = esInstantaneo ? new Date().toLocaleTimeString('en-US', { hour12: false }) : document.getElementById('live-time').value;
+    const duracionValue = esInstantaneo ? 0 : document.getElementById('duracion').value;
+    const timeUnit = esInstantaneo ? "undefined" : document.querySelector('input[name="time-unit"]:checked').value;
+    const agregarCalendario = esInstantaneo ? false : document.getElementById('add-to-calendar').checked;
+    const imagen = document.getElementById('live-image').files[0];
+
+    
+    if (!nombre || !descripcion || !enlace || (!esInstantaneo && (!fecha || !hora || !timeUnit))) {
+      alert('Todos los campos son obligatorios.');
+      return;
+    }
+
+    
+    const duracionFinal = timeUnit === "undefined" ? 0 : duracionValue;
+
+    const formData = new FormData();
+    formData.append('nombre', nombre);
+    formData.append('descripcion', descripcion);
+    formData.append('enlace', enlace);
+    formData.append('fecha', fecha);
+    formData.append('hora', hora);
+    formData.append('duracionValue', duracionFinal);
+    formData.append('timeUnit', timeUnit); 
+    formData.append('etiquetas', etiquetas.join(','));
+    formData.append('agregarCalendario', agregarCalendario);
+    formData.append('email', email);
+    formData.append('esInstantaneo', esInstantaneo);
+    if (imagen) {
+      formData.append('imagen', imagen);
+    }
+
+    console.log('Enviando datos para crear el LIVE...');
+    const response = await fetch('http://localhost:5000/api/live/crear', {
+      method: 'POST',
+      body: formData,
+    });
+
+    const data = await response.json();
+    if (data.success) {
+      alert(`LIVE ${esInstantaneo ? 'instantáneo' : ''} creado con éxito.`);
+      window.parent.postMessage({ action: 'cerrarModalLive' }, '*'); 
+      window.parent.dispatchEvent(new Event('liveModificado'));
+    } else {
+      alert(`Error al crear el LIVE ${esInstantaneo ? 'instantáneo' : ''}: ` + data.message);
+    }
+  } catch (error) {
+    console.error(`Error al crear LIVE ${esInstantaneo ? 'instantáneo' : ''}:`, error);
+    alert('Error del servidor.');
+  }
+}
+  </script>
+</body>
+</html>

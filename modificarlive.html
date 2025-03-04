@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modificar LIVE</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap");
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(to bottom, #f0f0f0, #ffffff);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .form-container {
+      background: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 600px;
+    }
+
+    .form-container h1 {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      text-align: center;
+      color: #333;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 5px;
+      color: #555;
+    }
+
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      outline: none;
+      transition: border-color 0.3s ease;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      border-color: #db4437;
+    }
+
+    .form-group textarea {
+      resize: none;
+      height: 100px;
+    }
+
+    .form-group .add-tag {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .form-group .add-tag button {
+      padding: 8px 12px;
+      background-color: #db4437;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .form-group .add-tag button:hover {
+      background-color: #b33c2c;
+    }
+
+    .form-group .file-input-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0 auto;
+      width: 100%;
+      max-width: 300px;
+      height: 150px;
+      background-color: #e0e0e0;
+      border: 2px dashed #ccc;
+      border-radius: 5px;
+      position: relative;
+    }
+
+    .form-group .file-input-container label {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #db4437;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      font-size: 24px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .form-group .file-input-container label:hover {
+      background-color: #b33c2c;
+    }
+
+    .form-group .file-input-container input {
+      display: none;
+    }
+
+    .duration-options {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .duration-options label {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .button-container {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .button-container button {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .button-container .share-live {
+      background-color: #28a745;
+    }
+
+    .button-container .share-live:hover {
+      background-color: #218838;
+    }
+
+    .tags-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 10px;
+    }
+    .tag {
+      background-color: #e0e0e0;
+      padding: 5px 10px;
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .tag button {
+      background: none;
+      border: none;
+      color: #db4437;
+      cursor: pointer;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <h1>Modificar LIVE</h1>
+    <form id="modificarLiveForm">
+      <div class="form-group">
+        <label for="live-name">Nombre del LIVE</label>
+        <input type="text" id="live-name" name="live-name" placeholder="Ingresa el nombre del LIVE">
+      </div>
+
+      <div class="form-group">
+        <label for="live-description">Descripción</label>
+        <textarea id="live-description" name="live-description" placeholder="Ingresa la descripción del LIVE"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="live-link">Enlace</label>
+        <input type="text" id="live-link" name="live-link" placeholder="Ingresa el enlace del LIVE">
+      </div>
+
+      <div class="form-group">
+        <label for="live-date">Fecha</label>
+        <input type="date" id="live-date" name="live-date">
+      </div>
+
+      <div class="form-group">
+        <label for="live-time">Hora</label>
+        <input type="time" id="live-time" name="live-time">
+      </div>
+
+      <div class="form-group">
+        <label for="live-duration">Duración</label>
+        <input type="number" id="live-duration" name="live-duration" placeholder="Ingresa la duración">
+        <div class="duration-options">
+          <label>
+            <input type="radio" name="duration-unit" value="hours" checked> Horas
+          </label>
+          <label>
+            <input type="radio" name="duration-unit" value="minutes"> Minutos
+          </label>
+          <label>
+            <input type="radio" name="duration-unit" value="indefinido"> Indefinido
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Etiquetas</label>
+        <div class="add-tag">
+          <input type="text" id="live-tags" name="live-tags" placeholder="Añadir etiqueta">
+          <button type="button" id="add-tag">+</button>
+        </div>
+        <div class="tags-container" id="tags-container"></div>
+      </div>
+
+      
+      <div class="form-group">
+        <label for="live-image">Imagen</label>
+        <div class="file-input-container">
+          <label for="live-image">+</label>
+          <input type="file" id="live-image" name="live-image" accept="image/*">
+        </div>
+      </div>
+    
+
+      <div class="button-container">
+        <button type="submit" id="guardar-cambios" class="share-live">Guardar LIVE</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const liveId = urlParams.get('liveId');
+      const nombre = urlParams.get('nombre');
+      const descripcion = urlParams.get('descripcion');
+      const fecha = urlParams.get('fecha');
+      const hora = urlParams.get('hora');
+      const etiquetas = urlParams.get('etiquetas') ? urlParams.get('etiquetas').split(',') : [];
+      const imagen = urlParams.get('imagen');
+      const enlace = urlParams.get('enlace');
+      const duracionValue = urlParams.get('duracionValue');
+      const duracionUnit = urlParams.get('duracionUnit');
+      const imagenInput = document.getElementById('live-image');
+      const fileInputContainer = document.querySelector('.file-input-container');
+
+  // Manejar la vista previa de la imagen
+  imagenInput.addEventListener('change', (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        // Actualizar la vista previa de la imagen en el modal
+        fileInputContainer.style.backgroundImage = `url('${e.target.result}')`;
+        fileInputContainer.style.backgroundSize = 'cover';
+        fileInputContainer.style.backgroundPosition = 'center';
+        fileInputContainer.style.border = 'none';
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+      // Llenar los campos del formulario con los datos del LIVE
+      document.getElementById('live-name').value = nombre || '';
+      document.getElementById('live-description').value = descripcion || '';
+      document.getElementById('live-link').value = enlace || '';
+      document.getElementById('live-date').value = fecha || '';
+      document.getElementById('live-time').value = hora || '';
+      document.getElementById('live-duration').value = duracionValue || '';
+      document.getElementById('live-image').value = ''; // Aquí puedes manejar la imagen si lo deseas
+
+      // Mostrar las etiquetas existentes
+      const tagsContainer = document.getElementById('tags-container');
+      etiquetas.forEach(tag => {
+        const tagElement = document.createElement('div');
+        tagElement.classList.add('tag');
+        tagElement.innerHTML = `${tag} <button onclick="eliminarEtiqueta('${tag}')">x</button>`;
+        tagsContainer.appendChild(tagElement);
+      });
+
+      // Seleccionar la opción de duración correcta
+      if (duracionUnit === 'indefinido') {
+        document.querySelector('input[name="duration-unit"][value="indefinido"]').checked = true;
+        document.getElementById('live-duration').disabled = true;
+      } else if (duracionUnit === 'minutes') {
+        document.querySelector('input[name="duration-unit"][value="minutes"]').checked = true;
+      } else {
+        document.querySelector('input[name="duration-unit"][value="hours"]').checked = true;
+      }
+
+      // Manejar la imagen si está presente
+      if (imagen) {
+        const fileInputContainer = document.querySelector('.file-input-container');
+        fileInputContainer.style.backgroundImage = `url('${imagen}')`;
+        fileInputContainer.style.backgroundSize = 'cover';
+        fileInputContainer.style.backgroundPosition = 'center';
+        fileInputContainer.style.border = 'none';
+      }
+
+      // Manejar el cambio en las opciones de duración
+      document.querySelectorAll('input[name="duration-unit"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+          const durationInput = document.getElementById('live-duration');
+          if (radio.value === 'indefinido') {
+            durationInput.disabled = true;
+            durationInput.value = '';
+          } else {
+            durationInput.disabled = false;
+          }
+        });
+      });
+
+      // Manejar la adición de nuevas etiquetas
+      document.getElementById('add-tag').addEventListener('click', () => {
+        const tagInput = document.getElementById('live-tags');
+        const tagValue = tagInput.value.trim();
+        if (tagValue && !etiquetas.includes(tagValue)) {
+          etiquetas.push(tagValue);
+          const tagElement = document.createElement('div');
+          tagElement.classList.add('tag');
+          tagElement.innerHTML = `${tagValue} <button onclick="eliminarEtiqueta('${tagValue}')">x</button>`;
+          tagsContainer.appendChild(tagElement);
+          tagInput.value = "";
+        }
+      });
+
+      // Función para eliminar etiquetas
+      window.eliminarEtiqueta = function(tag) {
+        etiquetas.splice(etiquetas.indexOf(tag), 1);
+        const tagElement = document.querySelector(`.tag:contains('${tag}')`);
+        if (tagElement) {
+          tagElement.remove();
+        }
+      };
+
+      document.getElementById('modificarLiveForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+
+  const formData = new FormData();
+  formData.append("nombre", document.getElementById("live-name").value);
+  formData.append("descripcion", document.getElementById("live-description").value);
+  formData.append("enlace", document.getElementById("live-link").value);
+  formData.append("fecha", document.getElementById("live-date").value);
+  formData.append("hora", document.getElementById("live-time").value);
+  formData.append("etiquetas", etiquetas.join(","));
+  formData.append("live-duration", document.getElementById("live-duration").value);
+  formData.append("duration-unit", document.querySelector('input[name="duration-unit"]:checked').value);
+
+  const imagenInput = document.getElementById("live-image");
+  if (imagenInput.files.length > 0) {
+    formData.append("imagen", imagenInput.files[0]);
+  }
+
+  console.log("Datos enviados al backend:", formData);
+
+  try {
+    const response = await fetch(`http://localhost:5000/api/live/modificar-live/${liveId}`, {
+      method: 'PUT',
+      body: formData,
+    });
+
+    const result = await response.json();
+    console.log("Respuesta del servidor:", result);
+
+    if (result.success) {
+      alert('LIVE modificado correctamente.');
+      window.parent.location.reload();
+    } else {
+      alert('Error al modificar el LIVE.');
+    }
+  } catch (error) {
+    console.error('Error al modificar el LIVE:', error);
+    alert('Error al modificar el LIVE.');
+  }
+});
+    });
+  </script>
+</body>
+</html>

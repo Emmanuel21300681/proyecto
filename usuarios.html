@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lista de Usuarios</title>
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      text-align: center;
+    }
+    .user-list {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 20px;
+    }
+    .user-card {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 10px;
+      margin: 5px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      cursor: pointer;
+      width: 300px;
+      transition: 0.3s;
+    }
+    .user-card:hover {
+      background-color: #f0f0f0;
+    }
+    .user-img {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-size: cover;
+      background-position: center;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Lista de Usuarios</h2>
+  <div class="user-list" id="userList"></div>
+
+  <script>
+    async function cargarUsuarios() {
+      try {
+        const response = await fetch('http://localhost:5000/api/usuarios');
+        const data = await response.json();
+
+        if (data.success) {
+          const userList = document.getElementById('userList');
+          data.usuarios.forEach(user => {
+            const userCard = document.createElement('div');
+            userCard.classList.add('user-card');
+            userCard.innerHTML = `
+              <div class="user-img" style="background-image: url('${user.fotoPerfil || 'img/perfil.jpg'}');"></div>
+              <span>${user.username}</span>
+            `;
+            userCard.onclick = () => verificarPerfil(user.email);
+            userList.appendChild(userCard);
+          });
+        }
+      } catch (error) {
+        console.error('Error al cargar usuarios:', error);
+      }
+    }
+
+    async function verificarPerfil(email) {
+      try {
+        const response = await fetch('http://localhost:5000/api/perfil/datos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        const data = await response.json();
+
+        if (data.success) {
+          const destino = data.cuentaPrivada ? 'preperfil.html' : 'perfilpublico.html';
+          window.location.href = `${destino}?email=${email}`;
+        }
+      } catch (error) {
+        console.error('Error al verificar perfil:', error);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', cargarUsuarios);
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lista de Seguidos</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: white;
+    }
+    .navbar {
+      background-color: #0e9ed6;
+      padding: 15px;
+      text-align: center;
+      color: white;
+      font-size: 20px;
+      font-weight: bold;
+    }
+    .container {
+      padding: 20px;
+    }
+    .friend {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+    }
+    .friend-info {
+      display: flex;
+      align-items: center;
+    }
+    .friend-info img {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+    .friend-info span {
+      font-size: 18px;
+    }
+    .btn {
+      padding: 5px 15px;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      font-size: 14px;
+      color: white;
+      transition: 0.3s;
+    }
+    .btn-danger { background-color: #db4437; }
+    .btn-primary { background-color: #1e90ff; }
+    .btn-warning { background-color: #f4a62a; }
+  </style>
+</head>
+<body>
+  <div class="navbar">Seguidos</div>
+  <div class="container" id="followersContainer">
+    <p>Cargando seguidos...</p>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      cargarSeguidos();
+    });
+
+ function cargarSeguidos() {
+  const email = localStorage.getItem('email');
+  fetch('http://localhost:5000/api/perfil/seguidores', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email })
+  })
+  .then(response => response.json())
+  .then(data => {
+    const container = document.getElementById('followersContainer');
+    container.innerHTML = '';
+    if (data.success && data.seguidos.length > 0) {
+      data.seguidos.forEach(amigo => {
+        const friendElement = document.createElement('div');
+        friendElement.classList.add('friend');
+
+        const friendInfo = document.createElement('div');
+        friendInfo.classList.add('friend-info');
+        friendInfo.innerHTML = `
+          <img src="${amigo.fotoPerfil || 'img/perfil.jpg'}" alt="Foto de perfil">
+          <span>${amigo.username}</span>
+        `;
+
+        const button = document.createElement('button');
+        button.classList.add('btn');
+
+        if (amigo.sonAmigos) {
+          button.classList.add('btn-danger');
+          button.textContent = "Dejar de seguir";
+          button.onclick = () => modificarAmistad(amigo, button);
+        } else if (amigo.solicitudPendiente) {
+          button.classList.add('btn-warning');
+          button.textContent = "Cancelar Solicitud";
+          button.onclick = () => cancelarSolicitud(amigo, button);
+        } else {
+          button.classList.add('btn-primary');
+          button.textContent = amigo.cuentaPrivada ? "Mandar Solicitud" : "Seguir";
+          button.onclick = () => mandarSolicitud(amigo, button);
+        }
+
+        const buttonContainer = document.createElement('div');
+        buttonContainer.appendChild(button);
+
+        friendElement.appendChild(friendInfo);
+        friendElement.appendChild(buttonContainer);
+        container.appendChild(friendElement);
+      });
+    } else {
+      container.innerHTML = '<p>No sigues a nadie aún.</p>';
+    }
+  })
+  .catch(error => {
+    console.error('Error al obtener seguidos:', error);
+    document.getElementById('followersContainer').innerHTML = '<p>Error al cargar seguidos.</p>';
+  });
+}
+
+    function modificarAmistad(amigo, button) {
+      const email = localStorage.getItem('email');
+      fetch('http://localhost:5000/api/perfil/eliminar-amigo-unilateral', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, amigoEmail: amigo.email })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          button.textContent = amigo.cuentaPrivada ? "Mandar Solicitud" : "Seguir";
+          button.classList.remove('btn-danger');
+          button.classList.add('btn-primary');
+          button.onclick = () => mandarSolicitud(amigo, button);
+        }
+      })
+      .catch(error => console.error('Error al modificar la amistad:', error));
+    }
+
+    function mandarSolicitud(amigo, button) {
+      const email = localStorage.getItem('email');
+      fetch('http://localhost:5000/api/perfil/mandar-solicitud', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, amigoEmail: amigo.email })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          if (amigo.cuentaPrivada) {
+            button.textContent = "Cancelar Solicitud";
+            button.classList.remove('btn-primary');
+            button.classList.add('btn-warning');
+            button.onclick = () => cancelarSolicitud(amigo, button);
+          } else {
+            button.textContent = "Dejar de seguir";
+            button.classList.remove('btn-primary');
+            button.classList.add('btn-danger');
+            button.onclick = () => modificarAmistad(amigo, button);
+          }
+        }
+      })
+      .catch(error => console.error('Error al enviar solicitud:', error));
+    }
+
+   function cancelarSolicitud(amigo, button) {
+  const email = localStorage.getItem('email');
+
+  fetch('http://localhost:5000/api/perfil/cancelar-solicitud', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, amigoEmail: amigo.email })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      console.log(`✅ Solicitud cancelada correctamente para ${amigo.email}`);
+
+
+      button.textContent = amigo.cuentaPrivada ? "Mandar Solicitud" : "Seguir";
+      button.classList.remove('btn-warning');
+      button.classList.add('btn-primary');
+
+
+      button.onclick = () => mandarSolicitud(amigo, button);
+    } else {
+      console.error('⚠️ No se pudo cancelar la solicitud:', data.message);
+    }
+  })
+  .catch(error => console.error('❌ Error al cancelar la solicitud:', error));
+}
+
+
+
+  </script>
+</body>
+</html>

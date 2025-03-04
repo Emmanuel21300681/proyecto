@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buzón de Solicitudes</title>
+  <style>
+    body { margin: 0; font-family: Arial, sans-serif; background-color: white; }
+    .navbar { background-color: rgb(172, 166, 137); padding: 10px; display: flex; justify-content: center; align-items: center; gap: 10px; border-bottom: 1px solid #ccc; }
+    .navbar button { background-color: skyblue; border: 2px solid deepskyblue; color: white; padding: 10px 20px; font-size: 16px; border-radius: 5px; cursor: pointer; transition: background-color 0.3s, transform 0.2s; }
+    .navbar button:hover { background-color: deepskyblue; transform: scale(1.05); }
+    .navbar button:active { transform: scale(0.95); }
+    .container { padding: 20px; }
+    .request { display: flex; align-items: center; justify-content: space-between; padding: 10px; border-bottom: 1px solid #ddd; }
+    .request-info { display: flex; align-items: center; }
+    .request img { width: 50px; height: 50px; border-radius: 50%; margin-right: 10px; }
+    .request span { font-size: 18px; }
+    .btn { padding: 5px 10px; border: none; cursor: pointer; border-radius: 5px; font-size: 14px; color: white; transition: 0.3s; }
+    .btn-danger { background-color: #db4437; }
+    .btn-primary { background-color: #1e90ff; }
+    .btn-warning { background-color: #ff9800; }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <button onclick="cargarSolicitudes('enviadas')">Solicitudes enviadas</button>
+    <button onclick="cargarSolicitudes('aceptadas')">Solicitudes aceptadas</button>
+    <button onclick="cargarSolicitudes('recibidas')">Solicitudes recibidas</button>
+    <button onclick="mostrarNotificaciones()">Notificaciones recibidas</button>
+  </div>
+  <div class="container" id="solicitudesContainer">
+    <p>Cargando solicitudes...</p>
+  </div>
+
+  <script src="https://cdn.socket.io/4.5.1/socket.io.min.js"></script>
+  
+  <script>
+    const socket = io('http://localhost:5000');
+    let sentRequests = [];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      cargarSolicitudes('enviadas');
+    });
+
+    socket.on('connect', () => {
+      console.log('🟢 Conectado al servidor de Socket.IO');
+      const userId = localStorage.getItem('userId');
+      if (userId) {
+        socket.emit('join', userId);
+      }
+    });
+
+    socket.on('notification', (notification) => {
+      console.log('🔔 Nueva notificación:', notification);
+      mostrarNotificacion(notification);
+    });
+
+    function mostrarNotificacion(notification) {
+      const container = document.getElementById('solicitudesContainer');
+      const notificationElement = document.createElement('div');
+      notificationElement.classList.add('request');
+      notificationElement.innerHTML = `
+        <div class="request-info">
+          <span>${notification.message}</span>
+        </div>
+      `;
+      container.prepend(notificationElement);
+    }
+
+    function cargarSolicitudes(tipo) {
+      const email = localStorage.getItem('email');
+      if (tipo === 'recibidas' && sentRequests.length === 0) {
+        fetch('http://localhost:5000/api/perfil/solicitudes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, tipo: 'enviadas' }),
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            sentRequests = data.solicitudes.map(solicitud => solicitud.email.toLowerCase().trim());
+            cargarSolicitudesRecibidas(email);
+          }
+        })
+        .catch(error => console.error('Error al obtener solicitudes enviadas:', error));
+      } else {
+        if (tipo === 'recibidas') {
+          cargarSolicitudesRecibidas(email);
+        } else {
+          fetch('http://localhost:5000/api/perfil/solicitudes', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, tipo }),
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              if (tipo === 'enviadas') {
+                sentRequests = data.solicitudes.map(solicitud => solicitud.email.toLowerCase().trim());
+              }
+              renderizarSolicitudes(data.solicitudes, tipo);
+            }
+          })
+          .catch(error => console.error('Error al obtener solicitudes:', error));
+        }
+      }
+    }
+
+    function cargarSolicitudesRecibidas(email) {
+      fetch('http://localhost:5000/api/perfil/solicitudes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, tipo: 'recibidas' }),
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          renderizarSolicitudes(data.solicitudes, 'recibidas');
+        }
+      })
+      .catch(error => console.error('Error al obtener solicitudes recibidas:', error));
+    }
+
+    function renderizarSolicitudes(solicitudes, tipo) {
+      const container = document.getElementById('solicitudesContainer');
+      container.innerHTML = '';
+
+      solicitudes.forEach(solicitud => {
+        const requestElement = document.createElement('div');
+        requestElement.classList.add('request');
+
+        const requestInfo = document.createElement('div');
+        requestInfo.classList.add('request-info');
+        requestInfo.innerHTML = `<img src="${solicitud.fotoPerfil || 'img/perfil.jpg'}" alt="Foto de perfil">
+                                <span>${solicitud.username}</span>`;
+
+        const buttonContainer = document.createElement('div');
+        buttonContainer.classList.add('request-buttons');
+
+        if (tipo === 'recibidas') {
+          const actionBtn = document.createElement('button');
+          actionBtn.classList.add('btn', 'btn-primary');
+          actionBtn.textContent = "Aceptar";
+          actionBtn.addEventListener('click', () => {
+            aceptarSolicitud(solicitud.email, actionBtn, solicitud.cuentaPrivada, requestElement);
+          });
+          buttonContainer.appendChild(actionBtn);
+
+          const rejectBtn = document.createElement('button');
+          rejectBtn.textContent = "Rechazar";
+          rejectBtn.classList.add('btn', 'btn-danger');
+          rejectBtn.addEventListener('click', () => {
+            rechazarSolicitud(solicitud.email, requestElement);
+          });
+          buttonContainer.appendChild(rejectBtn);
+        } else if (tipo === 'enviadas') {
+          const cancelBtn = document.createElement('button');
+          cancelBtn.classList.add('btn', 'btn-warning');
+          cancelBtn.textContent = 'Cancelar Solicitud';
+          cancelBtn.addEventListener('click', () => {
+            cancelarSolicitud(solicitud.email, cancelBtn, requestElement);
+          });
+          buttonContainer.appendChild(cancelBtn);
+        } else if (tipo === 'aceptadas') {
+          const unfollowBtn = document.createElement('button');
+          unfollowBtn.classList.add('btn', 'btn-secondary');
+          unfollowBtn.textContent = 'Dejar de Seguir';
+          unfollowBtn.addEventListener('click', () => {
+            eliminarAmigo(solicitud.email, requestElement);
+          });
+          buttonContainer.appendChild(unfollowBtn);
+        }
+
+        requestElement.appendChild(requestInfo);
+        requestElement.appendChild(buttonContainer);
+        container.appendChild(requestElement);
+      });
+    }
+
+    function aceptarSolicitud(solicitudEmail, btn, esPrivada, requestElement) {
+      const currentEmail = localStorage.getItem('email');
+      fetch('http://localhost:5000/api/perfil/aceptar-solicitud-parcial', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: currentEmail, amigoEmail: solicitudEmail }),
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          if (sentRequests.includes(solicitudEmail.toLowerCase().trim())) {
+            requestElement.remove();
+            cargarSolicitudes('enviadas');
+            cargarSolicitudes('recibidas');
+          } else {
+            const buttonContainer = requestElement.querySelector('.request-buttons');
+            buttonContainer.innerHTML = '';
+
+            const sendBtn = document.createElement('button');
+            sendBtn.textContent = esPrivada ? "Mandar Solicitud" : "Seguir";
+            sendBtn.classList.add('btn', 'btn-primary');
+            sendBtn.addEventListener('click', () => {
+              mandarSolicitud(solicitudEmail, sendBtn, requestElement);
+            });
+            buttonContainer.appendChild(sendBtn);
+
+            const rejectBtn = document.createElement('button');
+            rejectBtn.textContent = "Rechazar";
+            rejectBtn.classList.add('btn', 'btn-danger');
+            rejectBtn.addEventListener('click', () => {
+              rechazarSolicitud(solicitudEmail, requestElement);
+            });
+            buttonContainer.appendChild(rejectBtn);
+          }
+        }
+      })
+      .catch(error => console.error('Error al aceptar solicitud (parcial):', error));
+    }
+
+    function mandarSolicitud(amigoEmail, btn, requestElement) {
+      const email = localStorage.getItem('email');
+      fetch('http://localhost:5000/api/perfil/mandar-solicitud', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, amigoEmail }),
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          const cancelButton = document.createElement('button');
+          cancelButton.classList.add('btn', 'btn-warning');
+          cancelButton.textContent = "Cancelar Solicitud";
+          cancelButton.onclick = () => cancelarSolicitud(amigoEmail, cancelButton, requestElement);
+          btn.replaceWith(cancelButton);
+          sentRequests.push(amigoEmail.toLowerCase().trim());
+        }
+      })
+      .catch(error => console.error('Error al mandar solicitud:', error));
+    }
+
+    function cancelarSolicitud(amigoEmail, btn, requestElement) {
+      const email = localStorage.getItem('email');
+      fetch('http://localhost:5000/api/perfil/cancelar-solicitud', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, amigoEmail }),
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          const sendBtn = document.createElement('button');
+          sendBtn.textContent = "Mandar Solicitud";
+          sendBtn.classList.add('btn', 'btn-primary');
+          sendBtn.onclick = () => mandarSolicitud(amigoEmail, sendBtn, requestElement);
+          btn.replaceWith(sendBtn);
+          const index = sentRequests.indexOf(amigoEmail.toLowerCase().trim());
+          if (index > -1) {
+            sentRequests.splice(index, 1);
+          }
+        }
+      })
+      .catch(error => console.error('Error al cancelar solicitud:', error));
+    }
+
+    function aceptarSolicitudFinal(solicitudEmail, requestElement) {
+      const currentEmail = localStorage.getItem('email');
+      console.log(`[Front] Usuario A (${currentEmail}) está aceptando la solicitud final de Usuario B (${solicitudEmail})`);
+
+      fetch('http://localhost:5000/api/perfil/aceptar-solicitud', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: currentEmail, amigoEmail: solicitudEmail }),
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log("[Respuesta del Servidor]:", data);
+        if (data.success) {
+          console.log(`[Front] Amistad confirmada con ${solicitudEmail}`);
+          requestElement.remove();
+
+          const amigos = JSON.parse(localStorage.getItem('amigos') || []);
+          if (!amigos.includes(solicitudEmail)) {
+            amigos.push(solicitudEmail);
+            localStorage.setItem('amigos', JSON.stringify(amigos));
+          }
+
+          setTimeout(() => {
+            cargarSolicitudes('recibidas');
+            cargarSolicitudes('enviadas');
+            cargarSolicitudes('aceptadas');
+          }, 500);
+        } else {
+          console.error(' [Error Front] Fallo en aceptar solicitud:', data.message);
+        }
+      })
+      .catch(error => console.error('[Error Front] Problema en fetch:', error));
+    }
+
+    function rechazarSolicitud(amigoEmail, element) {
+      const email = localStorage.getItem('email');
+      fetch('http://localhost:5000/api/perfil/rechazar-solicitud', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, amigoEmail }),
+      })
+      .then(response => response.json())
+      .then(() => { 
+        element.remove(); 
+      })
+      .catch(error => console.error('Error al rechazar solicitud:', error));
+    }
+
+    function eliminarAmigo(amigoEmail, element) {
+      const email = localStorage.getItem('email');
+      fetch('http://localhost:5000/api/perfil/eliminar-amigo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, amigoEmail }),
+      })
+      .then(response => response.json())
+      .then(() => { 
+        element.remove(); 
+      })
+      .catch(error => console.error('Error al eliminar amigo:', error));
+    }
+
+    function mostrarNotificaciones() {
+      const email = localStorage.getItem('email');
+      fetch('http://localhost:5000/api/notificaciones', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          renderizarSolicitudes(data.notificaciones, 'notificaciones');
+        }
+      })
+      .catch(error => console.error('Error al obtener notificaciones:', error));
+    }
+  </script>
+</body>
+</html>

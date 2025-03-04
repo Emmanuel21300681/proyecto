@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Usuario Ocasional</title>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap");
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: "Poppins", sans-serif;
+      background-image: url('img/deportes2.jpg');
+      background-size: cover;
+      background-position: center;
+      margin: 0;
+      height: 100vh;
+      flex-direction: column;
+    }
+
+    .container {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+      width: 400px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 10px;
+      line-height: 1.2;
+    }
+
+    p {
+      font-size: 16px;
+      color: #555;
+      margin-bottom: 20px;
+    }
+
+    .age-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .age-buttons button {
+      width: 48%;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s, border 0.3s;
+    }
+
+    .age-buttons .minor {
+      background: #e74c3c;
+      color: #fff;
+    }
+
+    .age-buttons .minor:hover {
+      background: #c0392b;
+    }
+
+    .age-buttons .adult {
+      background: #27ae60;
+      color: #fff;
+    }
+
+    .age-buttons .adult:hover {
+      background: #229954;
+    }
+
+    .age-buttons button.selected.minor {
+      border: 2px solid #c0392b;
+      transform: scale(1.05);
+    }
+
+    .age-buttons button.selected.adult {
+      border: 2px solid #229954;
+      transform: scale(1.05);
+    }
+
+    .explore-button {
+      background: #e74c3c;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+      margin-top: 20px;
+    }
+
+    .explore-button:hover {
+      background: #2471a3;
+    }
+
+    .explore-button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Bienvenido<br>Usuario Ocasional</h1>
+    <p>
+      ¿Cuentas con la mayoría de edad? Necesitamos conocerlo para que así puedas enterarte
+      de todo el contenido preparado para ti.
+    </p>
+    <div class="age-buttons">
+      <button class="minor">Soy menor de 18</button>
+      <button class="adult">Soy mayor de 18</button>
+    </div>
+  </div>
+  <button class="explore-button">Comienza a explorar</button>
+
+  <script>
+    const minorButton = document.querySelector('.minor');
+    const adultButton = document.querySelector('.adult');
+    const exploreButton = document.querySelector('.explore-button');
+
+    let ageGroup = null;
+
+    function handleSelection(event) {
+        minorButton.classList.remove('selected');
+        adultButton.classList.remove('selected');
+
+        event.target.classList.add('selected');
+        ageGroup = event.target.classList.contains('minor') ? 'minor' : 'adult';
+    }
+
+    minorButton.addEventListener('click', handleSelection);
+    adultButton.addEventListener('click', handleSelection);
+
+    exploreButton.addEventListener('click', async () => {
+        if (!ageGroup) {
+            alert('Por favor, selecciona tu grupo de edad antes de continuar.');
+            return;
+        }
+
+        exploreButton.disabled = true;
+        exploreButton.textContent = 'Cargando...';
+
+        const mayoriaEdad = ageGroup === 'adult';
+
+        try {
+            const response = await fetch('http://localhost:5000/api/registro-ocasional', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mayoriaEdad }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error HTTP: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            if (data.success) {
+                alert('Registro exitoso. Redirigiendo...');
+                localStorage.setItem('ocasionalUserId', data.id);
+                localStorage.setItem('mayoriaEdad', data.mayoriaEdad);
+                window.location.href = 'inicio.html';
+            } else {
+                alert('Error al registrar usuario ocasional: ' + data.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('No se pudo conectar al servidor. Intenta más tarde.');
+        } finally {
+            exploreButton.disabled = false;
+            exploreButton.textContent = 'Comienza a explorar';
+        }
+    });
+  </script>
+</body>
+</html>

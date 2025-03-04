@@ -1,0 +1,75 @@
+router.post('/perfil/eliminar-amigo-unilateral', async (req, res) => {
+  const { email, amigoEmail } = req.body;
+
+  if (!email || !amigoEmail) {
+    return res.status(400).json({ success: false, message: 'Faltan datos obligatorios.' });
+  }
+
+  try {
+    const user = await User.findOne({ email });
+    const amigo = await User.findOne({ email: amigoEmail });
+
+    if (!user || !amigo) {
+      return res.status(404).json({ success: false, message: 'Usuario o amigo no encontrado.' });
+    }
+
+    
+    user.amigos = user.amigos.filter(a => a.toString() !== amigo._id.toString());
+
+    await user.save();
+
+    res.status(200).json({ success: true, message: 'Amigo eliminado correctamente de tu lista.' });
+  } catch (error) {
+    console.error('Error al eliminar amigo unilateralmente:', error);
+    res.status(500).json({ success: false, message: 'Error del servidor.' });
+  }
+});
+
+
+router.post('/perfil/agregar-amigo', async (req, res) => {
+  const { email, amigoEmail } = req.body;
+
+  if (!email || !amigoEmail) {
+    return res.status(400).json({ success: false, message: "Faltan datos obligatorios." });
+  }
+
+  try {
+    const user = await User.findOne({ email });
+    const amigo = await User.findOne({ email: amigoEmail });
+
+    if (!user || !amigo) {
+      return res.status(404).json({ success: false, message: "Usuario o amigo no encontrado." });
+    }
+
+    if (user.amigos.includes(amigo._id)) {
+      return res.status(400).json({ success: false, message: "Ya sigues a este usuario." });
+    }
+
+    await User.findOneAndUpdate(
+      { email },
+      { $addToSet: { amigos: amigo._id } },
+      { new: true }
+    );
+
+    // Noti
+    if (!amigo.cuentaPrivada) {
+      const nuevaNotificacion = new Notification({
+        tipo: 'nuevo_seguidor',
+        usuarioDestino: amigo._id,
+        usuarioOrigen: user._id,
+        mensaje: `${user.username} ha comenzado a seguirte.`,
+        fecha: new Date()
+      });
+
+      await nuevaNotificacion.save();
+
+      const io = req.app.get('io');
+      io.to(amigo._id.toString()).emit('nueva_notificacion', nuevaNotificacion);
+    }
+
+    res.status(200).json({ success: true, message: "Ahora sigues a este usuario." });
+  } catch (error) {
+    console.error("Error en agregar-amigo:", error);
+    res.status(500).json({ success: false, message: "Error del servidor." });
+  }
+});

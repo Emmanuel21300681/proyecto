@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Preperfil</title>
+  <script src="https://cdn.socket.io/4.5.1/socket.io.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: white;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+    }
+
+    .profile-container {
+      width: 700px;
+      padding: 30px;
+      position: relative;
+      border-bottom: 2px solid #ddd;
+      margin-top: 40px;
+    }
+
+    .profile-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      position: relative;
+    }
+
+    .profile-info {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      width: 100%;
+    }
+
+    .profile-img {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      background-size: cover;
+      background-position: center;
+      flex-shrink: 0;
+    }
+
+   .profile-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; 
+  margin-top: 10px;
+}
+
+
+    .username {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .user-type {
+      font-size: 18px;
+      color: gray;
+    }
+
+    .stats {
+      display: flex;
+      flex-direction: row; 
+      justify-content: space-around;
+      align-items: center;
+      width: 100%;
+    }
+
+    .stat {
+      font-size: 18px;
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .menu-container {
+      position: absolute;
+      top: 0;
+      right: 0;
+    }
+
+    .menu-icon {
+      font-size: 24px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .menu-dropdown {
+      display: none;
+      position: absolute;
+      top: 30px;
+      right: 0;
+      background: white;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+      border-radius: 5px;
+      overflow: hidden;
+      z-index: 10;
+    }
+
+    .menu-dropdown a {
+      display: block;
+      padding: 10px 15px;
+      text-decoration: none;
+      color: black;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .menu-dropdown a:hover {
+      background: #f2f2f2;
+    }
+
+    .follow-btn {
+      width: 100%;
+      padding: 15px;
+      font-size: 18px;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background-color: #0095f6;
+      color: white;
+      transition: 0.3s;
+      margin-top: 15px;
+    }
+
+    .follow-btn:hover {
+      background-color: #0073cc;
+    }
+
+    .cancel-btn {
+      background-color: #efefef;
+      color: black;
+    }
+
+    .cancel-btn:hover {
+      background-color: #ddd;
+    }
+
+    .divider {
+      width: 100%;
+      height: 2px;
+      background: #ddd;
+      margin: 15px 0;
+    }
+
+    .private-message {
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      color: gray;
+      margin-top: 20px;
+    }
+
+     .options-bar {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: space-evenly;
+      position: fixed;
+      top: 0;
+      left: 0;
+      background: rgba(255, 255, 255, 0.9);
+      width: 170px;
+      height: 100%;
+      box-shadow: 2px 0px 5px rgba(0, 0, 0, 0.1);
+      padding: 20px 10px;
+      z-index: 1000;
+    }
+
+    .option {
+      display: flex;
+      align-items: center;
+    }
+
+    .options-bar img {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+      margin-right: 10px;
+    }
+
+    .options-bar img:hover {
+      transform: scale(1.1);
+    }
+
+    .option-text {
+      font-size: 14px;
+      font-weight: 400;
+      color: #333;
+    }
+
+  </style>
+</head>
+<body>
+
+ <div class="options-bar">
+    <div class="option">
+      <img src="img/usuario.png" alt="Usuario">
+      <span class="option-text">Usuario</span>
+    </div>
+    <div class="option">
+      <img src="img/explorar.png" alt="Explorar">
+      <span class="option-text">Explorar</span>
+    </div>
+    <div class="option">
+      <img src="img/chats.png" alt="Chats">
+      <span class="option-text">Chats</span>
+    </div>
+    <div class="option">
+      <img src="img/grupo.png" alt="Grupo">
+      <span class="option-text">Grupo</span>
+    </div>
+    <div class="option">
+      <img src="img/foro.png" alt="Foro">
+      <span class="option-text">Foro</span>
+    </div>
+    <div class="option">
+      <img src="img/canal.png" alt="Canal">
+      <span class="option-text">Canal</span>
+    </div>
+    <div class="option">
+      <img src="img/evento.png" alt="Evento">
+      <span class="option-text">Evento</span>
+    </div>
+    <div class="option">
+      <img src="img/calendario.png" alt="Calendario">
+      <span class="option-text">Calendario</span>
+    </div>
+    <div class="option">
+      <img src="img/live.png" alt="Live">
+      <span class="option-text">Live</span>
+    </div>
+  </div>
+
+<div class="profile-container">
+  <div class="profile-header">
+    <div class="profile-info">
+      <div>
+        <div class="profile-img" id="profileImage"></div>
+        <div class="profile-text">
+          <div class="username" id="username"></div>
+          <div class="user-type" id="userType"></div>
+        </div>
+      </div>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-number" id="seguidores">0</div>
+          Seguidores
+        </div>
+        <div class="stat">
+          <div class="stat-number" id="seguidos">0</div>
+          Seguidos
+        </div>
+        <div class="stat">
+          <div class="stat-number" id="comunidades">0</div>
+          Comunidades
+        </div>
+      </div>
+    </div>
+
+   
+    <div class="menu-container">
+      <span class="menu-icon" onclick="toggleMenu()">&#x22EE;</span>
+      <div class="menu-dropdown" id="menuDropdown">
+        <a href="#" onclick="reportUser()">Reportar</a>
+        <a href="#" onclick="blockUser()">Bloquear</a>
+      </div>
+    </div>
+  </div>
+
+  <button class="follow-btn" id="followButton">Mandar solicitud</button>
+
+  <div class="divider"></div>
+
+  <div class="private-message">Esta cuenta es privada</div>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const email = urlParams.get('email'); 
+    const myEmail = localStorage.getItem('email'); 
+
+    if (!email || !myEmail) {
+        console.error("Faltan datos del usuario.");
+        return;
+    }
+
+    try {
+        
+        const response = await fetch('http://localhost:5000/api/perfil/datos', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            document.getElementById('profileImage').style.backgroundImage = `url('${data.fotoPerfil || 'img/perfil.jpg'}')`;
+            document.getElementById('username').textContent = data.username;
+            document.getElementById('userType').textContent = data.tipoUsuario;
+            await cargarEstadisticas(email);
+            await verificarSeguimiento(myEmail, email);
+        }
+    } catch (error) {
+        console.error("Error al cargar perfil:", error);
+    }
+});
+
+
+async function cargarEstadisticas(email) {
+    try {
+        const response = await fetch('http://localhost:5000/api/perfil/stats', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            document.getElementById('seguidores').textContent = data.stats.seguidores ?? "0";
+            document.getElementById('seguidos').textContent = data.stats.seguidos ?? "0";
+            document.getElementById('comunidades').textContent = data.stats.comunidades ?? "0";
+        }
+    } catch (error) {
+        console.error("Error al obtener estadísticas:", error);
+    }
+}
+
+
+async function verificarSeguimiento(myEmail, targetEmail) {
+    try {
+        const response = await fetch('http://localhost:5000/api/perfil/no-seguidos', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: myEmail, amigoEmail: targetEmail })
+        });
+
+        const data = await response.json();
+        const followButton = document.getElementById('followButton');
+
+        if (data.success) {
+            if (data.sonAmigos) {
+                followButton.textContent = "Siguiendo";
+                followButton.disabled = true;
+            } else if (data.solicitudPendiente) {
+                followButton.textContent = "Cancelar solicitud";
+                followButton.classList.add("cancel-btn");
+                followButton.onclick = () => toggleFollow(myEmail, targetEmail, true);
+            } else {
+                followButton.textContent = "Mandar solicitud";
+                followButton.classList.remove("cancel-btn");
+                followButton.onclick = () => toggleFollow(myEmail, targetEmail, false);
+            }
+        }
+    } catch (error) {
+        console.error("Error al verificar estado de seguimiento:", error);
+    }
+}
+
+
+async function toggleFollow(myEmail, targetEmail, cancel) {
+    const endpoint = cancel
+        ? "http://localhost:5000/api/perfil/cancelar-solicitud"
+        : "http://localhost:5000/api/perfil/mandar-solicitud";
+
+    try {
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: myEmail, amigoEmail: targetEmail })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            const followButton = document.getElementById('followButton');
+
+            if (cancel) {
+                followButton.textContent = "Mandar solicitud";
+                followButton.classList.remove("cancel-btn");
+                followButton.onclick = () => toggleFollow(myEmail, targetEmail, false);
+            } else {
+                followButton.textContent = "Cancelar solicitud";
+                followButton.classList.add("cancel-btn");
+                followButton.onclick = () => toggleFollow(myEmail, targetEmail, true);
+            }
+        } else {
+            console.error("Error en la solicitud:", result.message);
+        }
+    } catch (error) {
+        console.error("Error en la solicitud:", error);
+    }
+}
+
+
+function toggleMenu() {
+    const menu = document.getElementById("menuDropdown");
+    menu.style.display = menu.style.display === "block" ? "none" : "block";
+}
+
+
+function reportUser() {
+    alert("Usuario reportado.");
+}
+
+async function blockUser() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const bloqueadoEmail = urlParams.get('email'); // Usuario que se quiere bloquear
+    const myEmail = localStorage.getItem('email'); // Usuario actual
+
+    if (!bloqueadoEmail || !myEmail) {
+        alert("Error: No se puede bloquear a este usuario.");
+        return;
+    }
+
+    try {
+        const response = await fetch('http://localhost:5000/api/perfil/bloquear', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: myEmail, bloqueadoEmail })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            alert("Usuario bloqueado con éxito.");
+        } else {
+            alert("Error al bloquear usuario: " + result.message);
+        }
+    } catch (error) {
+        console.error("Error al bloquear usuario:", error);
+        alert("Error del servidor al bloquear usuario.");
+    }
+}
+
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seleccionar Color</title>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap");
+
+    body {
+      font-family: "Poppins", sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: none; 
+      overflow: hidden;
+    }
+
+    .popup {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      width: 95%;
+      max-width: 500px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .color-selector {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background-color: grey;
+      border: 2px solid #ccc;
+      cursor: pointer;
+      margin-bottom: 20px;
+      margin-top: 10px;
+      align-self: center; 
+    }
+
+    .form-group {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      font-size: 14px;
+      color: #555;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .form-group input[type="text"] {
+      width: 80%;
+      max-width: 350px;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .actions button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      color: white;
+    }
+
+    .actions .save-btn {
+      background-color: #4CAF50;
+    }
+
+    .actions .cancel-btn {
+      background-color: #f44336;
+    }
+  </style>
+</head>
+<body>
+  <div class="popup">
+    <div class="color-selector" onclick="openColorPicker()" id="colorCircle"></div>
+
+    <div class="form-group">
+      <label for="section-name">Nombre de la Clasificación</label>
+      <input type="text" id="section-name" placeholder="Ingrese el nombre">
+    </div>
+
+    <div class="actions">
+      <button class="save-btn" onclick="saveSection()">Guardar</button>
+      <button class="cancel-btn" onclick="parent.location.href='agregarcalendario.html'">Salir</button>
+    </div>
+  </div>
+  <input type="color" id="colorPicker" style="display: none;" onchange="updateColor()" />
+
+<script>
+  function openColorPicker() {
+    document.getElementById("colorPicker").click();
+  }
+
+  function updateColor() {
+    const color = document.getElementById("colorPicker").value;
+    document.getElementById("colorCircle").style.backgroundColor = color;
+  }
+
+  function closeSection() {
+    parent.postMessage({ action: "closeModal" }, "*"); 
+  }
+
+  async function saveSection() {
+    const color = document.getElementById("colorPicker").value;
+    const name = document.getElementById("section-name").value.trim();
+
+    if (!name || !color) {
+      alert("Por favor, completa todos los campos.");
+      return;
+    }
+
+    const email = localStorage.getItem("email"); 
+    if (!email) {
+      alert("No se encontró un correo asociado. Por favor, inicia sesión.");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:5000/api/calendario/agregar-seccion", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          name,
+          color,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert("Sección guardada correctamente.");
+
+        
+        parent.postMessage(
+          {
+            action: "sectionAdded",
+            section: {
+              name: data.section.name,
+              color: data.section.color,
+              id: data.section._id,
+            },
+          },
+          "*"
+        );
+
+        closeSection(); 
+      } else {
+        alert(`Error: ${data.message}`);
+      }
+    } catch (error) {
+      console.error("Error al guardar la sección:", error);
+      alert("Hubo un problema al guardar la sección. Por favor, intenta nuevamente.");
+    }
+  }
+</script>
+
+
+</body>
+</html>

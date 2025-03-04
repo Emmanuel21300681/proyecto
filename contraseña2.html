@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Restablecer Contraseña</title>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap");
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(to bottom, #d63031, #b71c1c);
+      margin: 0;
+      height: 100vh;
+    }
+
+    .container {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+      width: 400px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    input[readonly] {
+      background-color: #f6f6f6;
+      color: #aaa;
+      cursor: not-allowed;
+    }
+
+    button {
+      background: #db4437;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #c0392b;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Restablecer Contraseña</h1>
+    <form id="reset-password-form">
+      <input type="text" id="email" placeholder="Correo asociado" readonly>
+      <input type="password" id="new-password" placeholder="Nueva contraseña" required>
+      <input type="password" id="confirm-password" placeholder="Confirmar contraseña" required>
+      <button type="submit">Confirmar</button>
+    </form>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const emailInput = document.getElementById('email');
+      const email = localStorage.getItem('email');
+
+      if (!email) {
+        alert('No se encontró un correo asociado. Por favor, intenta nuevamente.');
+        window.location.href = 'registro.html';
+        return;
+      }
+
+      emailInput.value = email; 
+
+      document.getElementById('reset-password-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const newPassword = document.getElementById('new-password').value;
+        const confirmPassword = document.getElementById('confirm-password').value;
+
+        
+        if (newPassword !== confirmPassword) {
+          alert('Las contraseñas no coinciden. Por favor, inténtalo nuevamente.');
+          return;
+        }
+
+        if (newPassword.length < 8) {
+          alert('La contraseña debe tener al menos 8 caracteres.');
+          return;
+        }
+
+        
+        fetch('http://localhost:5000/api/restablecer-contraseña', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, newPassword }),
+        })
+          .then((response) => response.json())
+          .then((result) => {
+            if (result.success) {
+              alert('Contraseña actualizada exitosamente');
+              
+            } else {
+              alert('Error al actualizar la contraseña: ' + result.message);
+            }
+          })
+          .catch((error) => {
+            alert('Ocurrió un error al actualizar la contraseña. Intenta más tarde.');
+          });
+      });
+    });
+  </script>
+</body>
+</html>

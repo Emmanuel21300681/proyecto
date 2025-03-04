@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Selecciona tu Rol</title>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap");
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(to bottom, #d63031, #b71c1c);
+      margin: 0;
+      height: 100vh;
+      flex-direction: column;
+    }
+
+    .container {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+      width: 500px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 20px;
+    }
+
+    .image-selection {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .image-selection img {
+      width: 200px;
+      height: auto;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .image-selection img:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .image-text {
+      font-size: 16px;
+      color: #555;
+      margin-top: 10px;
+    }
+
+    .selected {
+      border: 3px solid #e74c3c;
+    }
+
+    .continue-button {
+      background: #e74c3c;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+      margin-top: 20px;
+    }
+
+    .continue-button:hover {
+      background: #c0392b;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>¿Qué eres?</h1>
+    <div class="image-selection">
+      <div>
+        <img src="img/deportista.png" alt="Deportista" id="deportista">
+        <p class="image-text">Deportista</p>
+      </div>
+      <div>
+        <img src="img/apasionado.png" alt="Apasionado" id="apasionado">
+        <p class="image-text">Apasionado</p>
+      </div>
+    </div>
+    <button class="continue-button" id="continueButton">Continuar</button>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const deportista = document.getElementById('deportista');
+      const apasionado = document.getElementById('apasionado');
+      const continueButton = document.getElementById('continueButton');
+
+      let selectedRole = null;
+
+      // Función para seleccionar el rol
+      function selectImage(selected) {
+        selectedRole = selected;
+
+        if (selected === 'Deportista') {
+          deportista.classList.add('selected');
+          apasionado.classList.remove('selected');
+        } else if (selected === 'Apasionado') {
+          apasionado.classList.add('selected');
+          deportista.classList.remove('selected');
+        }
+      }
+
+      // Escuchadores de eventos para seleccionar imágenes
+      deportista.addEventListener('click', () => selectImage('Deportista'));
+      apasionado.addEventListener('click', () => selectImage('Apasionado'));
+
+      // Manejo del botón "Continuar"
+      continueButton.addEventListener('click', async () => {
+        if (!selectedRole) {
+          alert('Por favor, selecciona un rol.');
+          return;
+        }
+
+        const email = localStorage.getItem('email'); // Recupera el correo desde localStorage
+        if (!email) {
+          alert('No se encontró un correo asociado. Por favor, intenta nuevamente.');
+          window.location.href = 'registro.html';
+          return;
+        }
+
+        try {
+          continueButton.textContent = 'Guardando...'; // Cambiar texto del botón mientras procesa
+          continueButton.disabled = true;
+
+          const response = await fetch('http://localhost:5000/api/setRole', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email, role: selectedRole }),
+          });
+
+          const result = await response.json();
+
+          if (response.ok) {
+            alert('Rol asignado correctamente.');
+            window.location.href = 'preferencias.html'; // Redirigir a preferencias.html
+          } else {
+            alert('Error al guardar el rol: ' + result.message);
+          }
+        } catch (error) {
+          console.error('Error al guardar el rol:', error);
+          alert('Error al conectarse al servidor.');
+        } finally {
+          continueButton.textContent = 'Continuar';
+          continueButton.disabled = false;
+        }
+      });
+    });
+  </script>
+</body>
+</html>

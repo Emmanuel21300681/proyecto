@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calendario Dinámico</title>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap");
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+body {
+  font-family: "Poppins", sans-serif;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh; 
+  background: linear-gradient(to bottom, #d3d3d3, #ffffff); 
+  background-attachment: fixed; 
+  background-size: cover;
+  background-position: center;
+}
+
+
+.main-content {
+  margin-top: 100px;
+  margin-left: 160px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  width: calc(100% - 160px);
+  height: auto; 
+}
+
+
+    .options-bar {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: space-evenly;
+      position: fixed;
+      top: 0;
+      left: 0;
+      background: rgba(255, 255, 255, 0.9);
+      width: 170px;
+      height: 100%;
+      box-shadow: 2px 0px 5px rgba(0, 0, 0, 0.1);
+      padding: 20px 10px;
+      z-index: 1000;
+    }
+
+    .option {
+      display: flex;
+      align-items: center;
+    }
+
+    .options-bar img {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+      margin-right: 10px;
+    }
+
+    .options-bar img:hover {
+      transform: scale(1.1);
+    }
+
+    .option-text {
+      font-size: 14px;
+      font-weight: 400;
+      color: #333;
+    }
+
+    .header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: fixed;
+  top: 0;
+  left: 170px; 
+  background: #db4437;
+  color: white;
+  width: calc(100% - 170px); 
+  height: 80px;
+  padding: 0 20px;
+  font-size: 28px;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+  z-index: 1001;
+}
+
+
+    .header h1 {
+      font-size: 36px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .header img {
+      height: 50px;
+      cursor: pointer;
+    }
+
+    .main-content {
+  margin-top: 100px;
+  margin-left: 160px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  width: calc(100% - 160px);
+  height: auto; 
+}
+
+
+
+ .circles-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px; 
+  margin-bottom: 20px;
+}
+
+.circle-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.circle-container .circle {
+  width: 36px; 
+  height: 36px; 
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #ccc;
+  border: 2px solid white;
+  margin: 2px;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  padding: 8px;
+}
+
+.circle-container .circle:hover {
+  transform: scale(1.1);
+}
+
+.circle-container .label {
+  text-align: center;
+  font-size: 12px;
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  margin-top: 5px;
+}
+
+.add-button-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; 
+}
+.add-button {
+      width: 35px;
+      height: 35px;
+      background: url('img/agregar.png') no-repeat center center;
+      background-size: cover;
+      cursor: pointer;
+      margin-bottom: 5px;
+      border: 2px solid white;
+      border-radius: 50%;
+    }
+
+    .add-label {
+      text-align: center;
+      font-size: 12px;
+      color: white;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    .calendar {
+      width: 750px;
+      max-width: 80%;
+      height: 520px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      text-align: center;
+    }
+
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .calendar-header h2 {
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .calendar-header button {
+      background: #db4437;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 15px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .calendar-header button:hover {
+      background: #c0392b;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px;
+      flex-grow: 1;
+    }
+
+    .calendar-grid .day-name {
+      font-weight: bold;
+      color: #333;
+    }
+
+    .calendar-grid div {
+      background: #f0f0f0;
+      padding: 10px;
+      border-radius: 5px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .calendar-grid .day {
+      background: #db4437;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .calendar-grid .day:hover {
+      background: #c0392b;
+    }
+
+    .calendar-iframe {
+  background-color: transparent; 
+}
+
+
+
+ .modal {
+  display: none; 
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8); 
+  z-index: 2000;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: none; 
+  border-radius: 10px;
+  width: 80%;
+  height: 80%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.calendar-iframe {
+  width: 100%;
+  height: 100%;
+  background-color: transparent; 
+  border: none;
+}
+
+.modify-content {
+  background: none; 
+  border-radius: 10px;
+  width: 80%;
+  height: 80%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modify-iframe {
+  width: 100%;
+  height: 100%;
+  background-color: transparent; 
+  border: none;
+}
+
+.event-card {
+  position: absolute; 
+  width: 300px;
+  max-height: 90vh; 
+  padding: 10px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  z-index: 4000;
+  overflow-y: auto; 
+}
+
+
+
+
+.event-header .circle-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: row; 
+  margin-bottom: 15px;
+}
+
+.event-header .circle {
+  width: 5px; 
+  height: 5px; 
+  font-size: 8px; 
+}
+
+
+
+
+.event-info ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 15px;
+}
+
+.event-info li {
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.event-actions {
+  margin-top: 15px; 
+  display: flex;
+  justify-content: center; 
+  gap: 15px; 
+}
+
+
+.event-actions button {
+  padding: 10px 15px; 
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  color: white;
+  font-size: 14px;
+}
+
+.event-actions button:hover {
+  background-color: #555;
+  pointer-events: none; 
+}
+
+
+.modify-btn {
+  background-color: #4CAF50;
+}
+
+.delete-btn {
+  background-color: #f44336;
+}
+
+.event-header .circle-container {
+  display: flex;
+  overflow-x: auto;
+  gap: 15px; 
+  justify-content: center;
+  align-items: center;
+}
+
+.circle-container .circle:hover {
+  transform: scale(1.05); 
+}
+
+
+.circle-container .circle {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+
+
+.event-header .circle {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #ccc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  font-size: 8px; 
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.slider-container {
+  display: flex;
+  overflow-x: hidden; 
+  gap: 10px;
+  padding: 10px 0;
+  position: relative;
+  justify-content: center;
+  align-items: center;
+}
+
+.slider-item {
+  width: 20px; 
+  height: 20px; 
+  border-radius: 50%;
+  background: #ccc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  font-size: 10px; 
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.slider-item:hover {
+  transform: scale(1.1); 
+  background: #b0b0b0;
+}
+
+.slider-item.active {
+  background: #db4437; 
+}
+
+
+
+.event-header .circle:hover {
+  transform: scale(1.1);
+  background: #b0b0b0;
+}
+
+.event-header .circle.active {
+  background: #db4437;
+}
+
+.no-hover .circle:hover {
+  transform: none; 
+  background: #ccc; 
+}
+
+.message-container.animate {
+  transform: translateY(-10px); 
+  opacity: 0.5; 
+  transition: transform 0.5s ease, opacity 0.5s ease; 
+}
+
+.event-info {
+  margin-top: 20px;
+  padding: 15px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.4s ease, opacity 0.4s ease; 
+  opacity: 1;
+}
+
+.event-info.animate {
+  transform: translateY(-10px); 
+  opacity: 0.5;
+}
+
+body.modal-open {
+  overflow: hidden; 
+  position: relative;
+}
+
+body.modal-open::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8); 
+  z-index: 999; 
+}
+
+.modaldelete {
+  position: fixed;
+  top: 50%; 
+  left: 50%; 
+  transform: translate(-50%, -50%); 
+  display: none; 
+  z-index: 1000; 
+}
+
+.delete-content {
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 20px 30px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); 
+  text-align: center;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center; 
+  gap: 15px; 
+  margin-top: 20px;
+}
+
+.modal-actions button {
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.modal-actions .confirm-delete {
+  background-color: #e74c3c;
+  color: #fff;
+}
+
+.modal-actions .cancel-delete {
+  background-color: #ccc;
+  color: #333;
+}
+
+.modal-actions .confirm-delete:hover {
+  background-color: #c0392b;
+}
+
+.modal-actions .cancel-delete:hover {
+  background-color: #aaa;
+}
+
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+
+
+
+  </style>
+
+
+
+</head>
+<body>
+
+  <div id="event-card" class="event-card">
+    <div class="event-header">
+      <div class="circle-container">
+        <div class="circle"></div>
+        <div class="circle"></div>
+        <div class="circle"></div>
+        <div class="circle"></div>
+        <div class="circle"></div>
+        <div class="circle"></div>
+        <div class="circle"></div>
+      </div>
+    </div>
+    <div class="event-info">
+      <ul>
+        <li>Evento: <span id="event-name">Nombre del evento</span></li>
+        <li>Sección: <span id="event-type">Sección</span></li> 
+        <li>Fecha: <span id="event-date">Fecha</span></li>
+        <li>Hora: <span id="event-time">Hora</span></li>
+        <li>Ubicación: <span id="event-location">Ubicación</span></li>
+        <li>Duración: <span id="event-duration">Duración</span></li>
+      </ul>
+    </div>
+    <div class="event-actions">
+      <button class="modify-btn">Modificar</button>
+      <button class="delete-btn">Eliminar</button>
+    </div>
+  </div>
+
+  <div class="options-bar">
+    <div class="option">
+      <img src="img/usuario.png" alt="Usuario">
+      <span class="option-text">Usuario</span>
+    </div>
+    <div class="option">
+      <img src="img/explorar.png" alt="Explorar">
+      <span class="option-text">Explorar</span>
+    </div>
+    <div class="option">
+      <img src="img/chats.png" alt="Chats">
+      <span class="option-text">Chats</span>
+    </div>
+    <div class="option">
+      <img src="img/grupo.png" alt="Grupo">
+      <span class="option-text">Grupo</span>
+    </div>
+    <div class="option">
+      <img src="img/foro.png" alt="Foro">
+      <span class="option-text">Foro</span>
+    </div>
+    <div class="option">
+      <img src="img/canal.png" alt="Canal">
+      <span class="option-text">Canal</span>
+    </div>
+    <div class="option">
+      <img src="img/evento.png" alt="Evento">
+      <span class="option-text">Evento</span>
+    </div>
+    <div class="option">
+      <img src="img/calendario.png" alt="Calendario">
+      <span class="option-text">Calendario</span>
+    </div>
+    <div class="option">
+      <img src="img/live.png" alt="Live">
+      <span class="option-text">Live</span>
+    </div>
+  </div>
+
+  <div class="header">
+    <h1>Calendario</h1>
+    <img src="img/AthleticXs.png" alt="AthleticXs">
+  </div>
+
+  <div class="main-content">
+    <div class="circles-section">
+      <div class="circle-container">
+        <div class="circle" style="background: orange;"></div>
+        <div class="label">Lives</div>
+      </div>
+      <div class="circle-container">
+        <div class="circle" style="background: blue;"></div>
+        <div class="label">Entrenamientos</div>
+      </div>
+      <div class="circle-container">
+        <div class="circle" style="background: yellow;"></div>
+        <div class="label">Citas Medicas</div>
+      </div>
+      <div class="circle-container">
+        <div class="circle" style="background: green;"></div>
+        <div class="label">Evento</div>
+      </div>
+      <div class="circle-container">
+        <div class="circle" style="background: red;"></div>
+        <div class="label">Competencia</div>
+      </div>
+      <div class="add-button-container">
+        <div class="add-button" onclick="openCalendarModal()"></div>
+
+        <div class="add-label">Agregar</div>
+      </div>
+    </div>
+
+    <div id="calendar-modal" class="modal">
+  <div class="modal-content">
+    <iframe src="agregarcalendario.html" frameborder="0" class="calendar-iframe" allowtransparency="true"></iframe>
+  </div>
+</div>
+
+   <div id="modify-modal" class="modal">
+  <div class="modify-content">
+    <iframe src="modificarcalendario.html" frameborder="0" class="modify-iframe" allowtransparency="true"></iframe>
+  </div>
+</div>
+
+
+<div id="delete-modal" class="modaldelete">
+  <div class="delete-content">
+    <h3>¿Eliminar evento?</h3>
+    <p>¿Estás seguro de que deseas eliminar este evento? Esta acción no se puede deshacer.</p>
+    <div class="modal-actions">
+      <button class="confirm-delete">Eliminar</button>
+      <button class="cancel-delete">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+
+
+    <div class="calendar">
+      <div class="calendar-header">
+        <button id="prev-month">&#8592;</button>
+        <h2 id="month-year">Enero 2024</h2>
+        <button id="next-month">&#8594;</button>
+      </div>
+      <div class="calendar-grid" id="calendar-grid"></div>
+    </div>
+  </div>
+
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const monthNames = [
+      "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+      "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+    ];
+    const dayNames = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+    const dayMap = {
+      dom: "domingo",
+      lun: "lunes",
+      mar: "martes",
+      mié: "miercoles",
+      jue: "jueves",
+      vie: "viernes",
+      sáb: "sabado",
+    };
+
+    const calendarGrid = document.getElementById("calendar-grid");
+    const monthYear = document.getElementById("month-year");
+    const prevMonthButton = document.getElementById("prev-month");
+    const nextMonthButton = document.getElementById("next-month");
+    const eventCard = document.getElementById("event-card");
+    const calendarModal = document.getElementById("calendar-modal");
+    const addButton = document.querySelector(".add-button");
+
+    let currentMonth = new Date().getMonth();
+    let currentYear = new Date().getFullYear();
+
+    if (eventCard) eventCard.style.display = "none";
+    if (calendarModal) calendarModal.style.display = "none";
+
+    const eventsByDate = {};
+    const recurringEvents = [];
+    const sectionColors = {
+      live: "orange",
+      entrenamiento: "blue",
+      "cita médica": "yellow",
+      evento: "green",
+      competencia: "red",
+    };
+
+    if (addButton && calendarModal) {
+      addButton.addEventListener("click", () => {
+        calendarModal.style.display = "flex";
+        window.scrollTo(0, 0);
+      });
+    }
+
+    if (calendarModal) {
+      window.addEventListener("click", (e) => {
+        if (e.target === calendarModal) {
+          calendarModal.style.display = "none";
+        }
+      });
+    }
+
+    async function fetchSectionsAndEvents() {
+  try {
+    const email = localStorage.getItem("email");
+    if (!email) {
+      console.error("No se encontró el email del usuario.");
+      return;
+    }
+
+
+    const sectionResponse = await fetch("http://localhost:5000/api/calendario/obtener-secciones", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    const sectionResult = await sectionResponse.json();
+
+    if (sectionResult.success) {
+      sectionResult.sections.forEach((section) => {
+        sectionColors[section.name.toLowerCase()] = section.color;
+      });
+    }
+
+
+    const eventResponse = await fetch("http://localhost:5000/api/calendario/obtener-eventos", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    const eventResult = await eventResponse.json();
+
+    if (eventResult.success) {
+      eventResult.events.forEach((event) => {
+        if (event.date) {
+          const dateKey = event.date.split("T")[0];
+          if (!eventsByDate[dateKey]) eventsByDate[dateKey] = [];
+          eventsByDate[dateKey].push(event);
+        } else if (event.days) {
+          recurringEvents.push(event);
+        }
+      });
+
+      renderCalendar(currentMonth, currentYear);
+    }
+
+   
+    renderCircles();
+  } catch (error) {
+    console.error("Error al obtener secciones o eventos:", error);
+  }
+}
+
+
+function renderCircles() {
+  const circlesSection = document.querySelector(".circles-section");
+
+  
+  const dynamicCircles = document.querySelectorAll(".circle-container.dynamic");
+  dynamicCircles.forEach((circle) => circle.remove());
+
+  
+  Object.entries(sectionColors).forEach(([sectionName, color]) => {
+    if (!["live", "entrenamiento", "cita médica", "evento", "competencia"].includes(sectionName)) {
+      const container = document.createElement("div");
+      container.classList.add("circle-container", "dynamic");
+
+      const circle = document.createElement("div");
+      circle.classList.add("circle");
+      circle.style.backgroundColor = color;
+
+      const label = document.createElement("div");
+      label.classList.add("label");
+      label.textContent = sectionName.charAt(0).toUpperCase() + sectionName.slice(1);
+
+      container.appendChild(circle);
+      container.appendChild(label);
+      circlesSection.insertBefore(container, circlesSection.lastElementChild); 
+    }
+  });
+}
+
+
+ function renderCalendar(month, year) {
+  calendarGrid.innerHTML = "";
+
+
+  dayNames.forEach((day) => {
+    const dayNameDiv = document.createElement("div");
+    dayNameDiv.classList.add("day-name");
+    dayNameDiv.textContent = day;
+    calendarGrid.appendChild(dayNameDiv);
+  });
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  monthYear.textContent = `${monthNames[month]} ${year}`;
+
+  for (let i = 0; i < firstDay; i++) {
+    const emptyDiv = document.createElement("div");
+    calendarGrid.appendChild(emptyDiv);
+  }
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateKey = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    const dayDiv = document.createElement("div");
+    dayDiv.classList.add("day");
+    dayDiv.textContent = day;
+
+    const dayOfWeekIndex = (firstDay + day - 1) % 7;
+    const dayName = dayNames[dayOfWeekIndex].toLowerCase();
+    const mappedDayName = dayMap[dayName];
+
+    const eventsForDay = [];
+
+    if (eventsByDate[dateKey]) {
+      eventsForDay.push(...eventsByDate[dateKey]);
+    }
+
+    recurringEvents.forEach((event) => {
+      if (event.days[mappedDayName]) {
+        eventsForDay.push(event);
+      }
+    });
+
+    if (eventsForDay.length > 0) {
+      dayDiv.style.backgroundColor = "#ff8c8c";
+      dayDiv.addEventListener("click", (event) => {
+        showEventCard(day, month, year, eventsForDay);
+      });
+    }
+
+    calendarGrid.appendChild(dayDiv);
+  }
+}
+
+
+
+
+ function showEventCard(day, month, year, eventData) {
+  if (!eventData || eventData.length === 0) {
+    alert("No hay eventos para este día.");
+    return;
+  }
+
+  let activeIndex = 0;
+  const eventCount = eventData.length;
+
+  const modifyButton = document.querySelector(".modify-btn");
+  const deleteButton = document.querySelector(".delete-btn");
+  const deleteModal = document.getElementById("delete-modal"); 
+
+  const circles = document.querySelectorAll(".event-card .circle");
+  circles.forEach((circle) => {
+    circle.style.backgroundColor = "#ccc";
+    circle.style.opacity = 0.3;
+    const newCircle = circle.cloneNode(true);
+    circle.replaceWith(newCircle);
+  });
+
+  const updatedCircles = document.querySelectorAll(".event-card .circle");
+
+  function updateEventInfo(index) {
+    const eventInfo = eventData[index];
+
+
+    document.getElementById("event-name").textContent = eventInfo.eventName || "Sin nombre";
+    document.getElementById("event-date").textContent = day
+      ? `${day} de ${monthNames[month]} ${year}`
+      : "Recurrente";
+    document.getElementById("event-time").textContent = eventInfo.time || "Sin hora";
+    document.getElementById("event-location").textContent = eventInfo.location || "Sin ubicación";
+    document.getElementById("event-duration").textContent = eventInfo.duration?.value
+      ? `${eventInfo.duration.value} ${eventInfo.duration.unit}`
+      : "Indefinido";
+    document.getElementById("event-type").textContent = eventInfo.type || "Sin sección";
+
+ 
+    modifyButton.dataset.eventId = eventInfo._id;
+
+    deleteButton.dataset.eventId = eventInfo._id;
+
+    updatedCircles.forEach((circle, circleIndex) => {
+      if (circleIndex < eventCount) {
+        const sectionType = eventData[circleIndex].type.toLowerCase();
+        circle.style.backgroundColor = sectionColors[sectionType] || "#ccc";
+        circle.style.opacity = circleIndex === index ? 1 : 0.5;
+      } else {
+        circle.style.backgroundColor = "#ccc";
+        circle.style.opacity = 0.3;
+      }
+    });
+
+    const eventInfoElement = document.querySelector(".event-info");
+    eventInfoElement.style.transform = "translateY(10px)";
+    eventInfoElement.style.opacity = "0";
+    setTimeout(() => {
+      eventInfoElement.style.transform = "translateY(0)";
+      eventInfoElement.style.opacity = "1";
+    }, 200);
+  }
+
+  updatedCircles.forEach((circle, index) => {
+    if (index < eventCount) {
+      circle.addEventListener("click", () => {
+        activeIndex = index;
+        updateEventInfo(activeIndex);
+      });
+    }
+  });
+
+  updateEventInfo(activeIndex);
+
+  const targetRect = event.target.getBoundingClientRect();
+  const cardHeight = eventCard.offsetHeight;
+  const windowHeight = window.innerHeight;
+
+  let cardTop = targetRect.bottom + window.scrollY + 5;
+  if (cardTop + cardHeight > windowHeight + window.scrollY) {
+    cardTop = targetRect.top + window.scrollY - cardHeight - 10;
+  }
+
+  eventCard.style.top = `${cardTop}px`;
+  eventCard.style.left = `${targetRect.left + window.scrollX}px`;
+  eventCard.style.display = "block";
+
+
+  deleteButton.addEventListener("click", () => {
+    eventCard.style.display = "none";
+    deleteModal.style.display = "flex"; 
+    document.body.classList.add("modal-open"); 
+
+
+    deleteModal.querySelector(".cancel-delete").addEventListener("click", () => {
+      deleteModal.style.display = "none";
+      document.body.classList.remove("modal-open");
+    });
+
+
+    deleteModal.querySelector(".confirm-delete").addEventListener("click", async () => {
+      try {
+        const response = await fetch(`http://localhost:5000/api/calendario/eliminar-evento/${deleteButton.dataset.eventId}`, {
+          method: "DELETE",
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          alert("Evento eliminado correctamente.");
+        } else {
+          alert("Error al eliminar el evento: " + result.message);
+        }
+      } catch (error) {
+        console.error("Error al eliminar evento:", error);
+        alert("Ocurrió un error al eliminar el evento.");
+      } finally {
+        deleteModal.style.display = "none"; 
+        document.body.classList.remove("modal-open"); 
+      }
+    });
+  });
+}
+
+
+
+    window.addEventListener("click", (e) => {
+      if (eventCard && !eventCard.contains(e.target) && !e.target.classList.contains("day")) {
+        eventCard.style.display = "none";
+      }
+    });
+
+    prevMonthButton.addEventListener("click", () => {
+      currentMonth--;
+      if (currentMonth < 0) {
+        currentMonth = 11;
+        currentYear--;
+      }
+      renderCalendar(currentMonth, currentYear);
+    });
+
+    nextMonthButton.addEventListener("click", () => {
+      currentMonth++;
+      if (currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+      }
+      renderCalendar(currentMonth, currentYear);
+    });
+
+    fetchSectionsAndEvents();
+  });
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const modal = document.getElementById("calendar-modal");
+  const iframe = document.querySelector(".calendar-iframe");
+
+  
+  function closeModal() {
+    if (modal) {
+      modal.style.display = "none";
+      console.log("Modal cerrado desde la página principal.");
+    }
+  }
+
+  
+  window.addEventListener("message", (event) => {
+    if (event.data === "closeModal") {
+      closeModal(); 
+    }
+  });
+
+  
+  modal.addEventListener("click", (event) => {
+    if (event.target === modal) {
+      closeModal();
+    }
+  });
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const modifyButtons = document.querySelectorAll(".modify-btn");
+  const modifyModal = document.getElementById("modify-modal");
+  const modifyIframe = document.querySelector(".modify-iframe");
+  const eventCard = document.getElementById("event-card");
+
+  modifyButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const eventId = button.dataset.eventId;
+      const eventName = document.getElementById("event-name").textContent;
+      const eventDate = document.getElementById("event-date").textContent;
+      const eventTime = document.getElementById("event-time").textContent;
+      const eventLocation = document.getElementById("event-location").textContent;
+      const eventDuration = document.getElementById("event-duration").textContent;
+      const eventType = document.getElementById("event-type").textContent;
+
+      
+      const eventData = eventCard.dataset.eventData; 
+      let days = {
+        lunes: false,
+        martes: false,
+        miercoles: false,
+        jueves: false,
+        viernes: false,
+        sabado: false,
+        domingo: false,
+      };
+
+      
+      if (eventData) {
+        const parsedEventData = JSON.parse(eventData);
+        days = {
+          lunes: parsedEventData.lunes || false,
+          martes: parsedEventData.martes || false,
+          miercoles: parsedEventData.miercoles || false,
+          jueves: parsedEventData.jueves || false,
+          viernes: parsedEventData.viernes || false,
+          sabado: parsedEventData.sabado || false,
+          domingo: parsedEventData.domingo || false,
+        };
+      }
+
+      
+      eventCard.style.display = "none";
+
+      
+      modifyModal.style.display = "flex";
+
+     
+      const eventDetails = {
+        eventId,
+        eventName,
+        eventDate,
+        eventTime,
+        eventLocation,
+        eventDuration,
+        eventType,
+        lunes: days.lunes,
+        martes: days.martes,
+        miercoles: days.miercoles,
+        jueves: days.jueves,
+        viernes: days.viernes,
+        sabado: days.sabado,
+        domingo: days.domingo,
+      };
+
+      modifyIframe.src = `modificarcalendario.html?${new URLSearchParams(eventDetails).toString()}`;
+    });
+  });
+
+  
+  window.addEventListener("click", (e) => {
+    if (e.target === modifyModal) {
+      modifyModal.style.display = "none";
+    }
+  });
+});
+
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const deleteButtons = document.querySelectorAll(".delete-btn");
+  const deleteModal = document.getElementById("delete-modal"); 
+  const confirmDeleteButton = deleteModal.querySelector(".confirm-delete");
+  const cancelDeleteButton = deleteModal.querySelector(".cancel-delete");
+  let currentEventId = null; 
+
+  
+  deleteModal.style.display = "none";
+
+  deleteButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      currentEventId = button.dataset.eventId; 
+      deleteModal.style.display = "block"; 
+    });
+  });
+
+  confirmDeleteButton.addEventListener("click", async () => {
+    if (!currentEventId) return;
+
+    try {
+      const response = await fetch(`http://localhost:5000/api/calendario/eliminar-evento/${currentEventId}`, {
+        method: "DELETE",
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        alert("Evento eliminado correctamente.");
+        location.reload(); 
+      } else {
+
+      }
+    } catch (error) {
+      console.error("Error al eliminar evento:", error);
+      alert("Ocurrió un error al eliminar el evento.");
+    } finally {
+      deleteModal.style.display = "none"; 
+    }
+  });
+
+  cancelDeleteButton.addEventListener("click", () => {
+    deleteModal.style.display = "none"; 
+    currentEventId = null; 
+  });
+
+
+  window.addEventListener("click", (e) => {
+    if (e.target === deleteModal) {
+      deleteModal.style.display = "none";
+      currentEventId = null;
+    }
+  });
+});
+
+</script>
+
+
+
+
+</body>
+</html>

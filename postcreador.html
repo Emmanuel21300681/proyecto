@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instagram-like Post</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: transparent;
+    }
+    .menu-icon {
+      cursor: pointer;
+      font-size: 24px;
+      margin-left: auto;
+    }
+    .menu-dropdown {
+      display: none;
+      position: absolute;
+      top: 60px;
+      right: 20px;
+      background-color: #ffffff;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      z-index: 100;
+    }
+    .menu-dropdown button {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      padding: 10px;
+      border: none;
+      background: none;
+      text-align: left;
+      cursor: pointer;
+    }
+    .menu-dropdown button:hover {
+      background-color: #f0f0f0;
+    }
+    .menu-dropdown button i {
+      margin-right: 10px;
+      font-size: 20px;
+    }
+    .post {
+      max-width: 500px;
+      margin: 20px auto;
+      background-color: #ffffff;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 15px;
+    }
+    .profile-circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #ccc;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      overflow: hidden;
+    }
+    .image-placeholder {
+      width: 100%;
+      height: 300px;
+      background-color: #e0e0e0;
+      border-radius: 5px;
+      margin: 15px 0;
+      background-size: cover;
+      background-position: center;
+    }
+    .post-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+    }
+    .post-header .profile-circle {
+      margin-right: 10px;
+    }
+    .post-header span {
+      margin-left: 5px;
+      font-size: 16px;
+    }
+    .icon {
+      cursor: pointer;
+      font-size: 24px;
+      margin-right: 5px;
+    }
+    .icon.red {
+      color: red;
+    }
+    .actions {
+      display: flex;
+      align-items: center;
+      margin-top: 10px;
+    }
+    .actions span {
+      display: flex;
+      align-items: center;
+      margin-right: 15px;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #ffffff;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      z-index: 200;
+      width: 90%;
+      max-width: 500px;
+      overflow-y: auto;
+      max-height: 80%;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .modal-header h2 {
+      margin: 0;
+      font-size: 18px;
+    }
+    .modal-header button {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+    }
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 100;
+    }
+    .comment-box-container {
+      display: flex;
+      align-items: center;
+      position: relative;
+      margin-top: 20px;
+    }
+    #comment-box {
+      flex-grow: 1;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      resize: none;
+    }
+    .send-icon {
+      font-size: 24px;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+    .comment {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .comment p {
+      margin: 0;
+      padding-left: 10px;
+      font-size: 14px;
+    }
+    .post-description-container {
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      margin-bottom: 5px; 
+    }
+    .post-description {
+      flex-grow: 1; 
+      margin-right: 10px; 
+      font-size: 14px;
+      color: #333;
+    }
+    .post-actions {
+      display: flex;
+      gap: 10px; 
+      position: relative; 
+      top: -10px; 
+      left: -15px; 
+      align-items: center;
+    }
+    .post-actions span {
+      display: flex;
+      align-items: center; 
+    }
+    .post-date {
+      font-size: 12px;
+      color: #666;
+      text-align: left; 
+    }
+  </style>
+</head>
+<body>
+
+  <div class="post" id="post">
+    <div class="post-header">
+      <div style="display: flex; align-items: center;">
+        <div class="profile-circle"></div>
+        <span>Usuario</span>
+      </div>
+      <span class="menu-icon" onclick="toggleMenu()">☰</span>
+    </div>
+    <div class="image-placeholder"></div>
+    <div class="post-description-container">
+      <div class="post-description" id="postDescription"></div>
+      <div class="post-actions">
+        <span><i class="icon" id="like-icon" onclick="toggleLike()">♡</i><span id="like-count">0</span></span>
+        <span><i class="icon" onclick="openCommentsModal()">💬</i><span id="comment-count">0</span></span>
+      </div>
+    </div>
+    <div class="menu-dropdown" id="menu-dropdown">
+      <button onclick="deletePost()">🗑️ Borrar</button>
+    </div>
+    <div class="modal" id="comments-modal">
+      <div class="modal-header">
+        <h2>Comentarios</h2>
+        <button onclick="closeCommentsModal()">&times;</button>
+      </div>
+      <div id="comments-list"></div>
+      <div class="comment-box-container">
+        <div class="profile-circle" id="user-profile-circle"></div>
+        <textarea id="comment-box" placeholder="Escribe un comentario..."></textarea>
+        <span class="send-icon" id="send-icon" onclick="postComment()">✈️</span>
+      </div>
+    </div>
+    <div class="overlay" id="overlay" onclick="closeCommentsModal()"></div>
+  </div>
+
+  <script src="https://cdn.socket.io/4.5.1/socket.io.min.js"></script>
+  <script>
+    let likes = 0;
+    let comments = [];
+    let postId; 
+
+    const commentCount = document.getElementById('comment-count');
+    const commentsModal = document.getElementById('comments-modal');
+    const overlay = document.getElementById('overlay');
+    const commentsList = document.getElementById('comments-list');
+    const commentBox = document.getElementById('comment-box');
+
+    
+    function toggleMenu() {
+      const menuDropdown = document.getElementById('menu-dropdown');
+      menuDropdown.style.display = menuDropdown.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function deletePost() {
+      if (confirm('¿Estás seguro de que deseas borrar esta publicación?')) {
+        const email = localStorage.getItem('email');
+        if (!email) {
+          alert('No se pudo identificar al usuario.');
+          return;
+        }
+        fetch('http://localhost:5000/api/post/eliminar', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, postId }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              alert('Publicación eliminada correctamente.');
+              parent.postMessage({ action: 'deletePost', id: postId }, '*');
+              window.close();
+            } else {
+              alert(`Error: ${data.message}`);
+            }
+          })
+          .catch((error) => {
+            console.error('Error al eliminar la publicación:', error);
+            alert('Hubo un problema al eliminar la publicación.');
+          });
+      }
+    }
+
+    function toggleLike() {
+      const email = localStorage.getItem('email');
+      if (!email) {
+        console.error('No se encontró el email en localStorage.');
+        return;
+      }
+      fetch('http://localhost:5000/api/post/like', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, postId }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            likes = data.likes;
+            const likeIcon = document.getElementById('like-icon');
+            likeIcon.textContent = data.liked ? '❤️' : '♡';
+            updatePost();
+          } else {
+            console.error('Error al actualizar el like:', data.message);
+          }
+        })
+        .catch((error) => console.error('Error al realizar la solicitud de like:', error));
+    }
+
+    
+    function openCommentsModal() {
+      commentsModal.style.display = 'block';
+      overlay.style.display = 'block';
+      updateCommentsList();
+    }
+
+    
+    function closeCommentsModal() {
+      commentsModal.style.display = 'none';
+      overlay.style.display = 'none';
+    }
+
+    function postComment() {
+  const email = localStorage.getItem('email');
+  if (!email) {
+    console.error('No se encontró el email en localStorage.');
+    return;
+  }
+
+  const comment = commentBox.value.trim();
+  if (!comment) return;
+
+
+  const userData = JSON.parse(localStorage.getItem('userData')); 
+  const fotoPerfil = userData && userData.fotoPerfil 
+    ? userData.fotoPerfil 
+    : 'https://res.cloudinary.com/drrb19jky/image/upload/v1739061826/uploads/default_profile.jpg'; 
+
+  fetch('http://localhost:5000/api/post/comentar', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, postId, contenido: comment }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.success) {
+        console.log('✅ Comentario agregado en la BD:', data.comentarios);
+        
+   
+        comments.push({
+          usuario: userData.username, 
+          contenido: comment,
+          fotoPerfil: fotoPerfil, 
+        });
+
+        updateCommentsList(); 
+      } else {
+        console.error('❌ Error al agregar comentario:', data.message);
+      }
+    })
+    .catch((error) => console.error('❌ Error al realizar la solicitud de comentario:', error));
+
+  commentBox.value = ''; 
+}
+
+
+
+    function savePostData() {
+      fetch('http://localhost:5000/api/post/actualizar', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ postId, likes, comments }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (!data.success) {
+            console.error('Error al guardar los cambios:', data.message);
+          }
+        })
+        .catch((error) => console.error('Error al guardar los cambios:', error));
+    }
+
+function updateCommentsList() {
+  console.log("🔄 Actualizando comentarios:", comments);
+
+  comments.forEach(comment => {
+    console.log(`🛠️ Comentario recibido:`, comment);
+  });
+
+  commentsList.innerHTML = comments.map(comment => {
+    console.log(`🛠️ Imagen recibida para ${comment.usuario}:`, comment.fotoPerfil);
+
+    const foto = (comment.fotoPerfil && comment.fotoPerfil.startsWith('http'))
+        ? comment.fotoPerfil 
+        : 'https://res.cloudinary.com/drrb19jky/image/upload/v1739061826/uploads/default_profile.jpg';
+
+    console.log(`✅ Mostrando imagen de perfil: ${foto} para el usuario ${comment.usuario}`);
+
+    return `<div class="comment">
+              <div class="profile-circle" style="background-image: url('${foto}');"></div>
+              <p><strong>${comment.usuario}:</strong> ${comment.contenido}</p>
+            </div>`;
+  }).join('');
+}
+
+
+
+    function updatePost() {
+      document.getElementById('like-count').textContent = likes;
+      commentCount.textContent = comments.length;
+      updateCommentsList();
+    }
+
+    window.addEventListener('message', (event) => {
+      if (event.data.action === 'loadData') {
+        const data = event.data.data || { likes: 0, comments: [] };
+        likes = data.likes;
+        comments = data.comments;
+        updatePost();
+      }
+    });
+
+    window.addEventListener('beforeunload', () => {
+      parent.postMessage({ action: 'saveData', id: postId, data: { likes, comments } }, '*');
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      
+      const urlParams = new URLSearchParams(window.location.search);
+      const imageSrc = urlParams.get('image');
+      postId = urlParams.get('id');
+      if (!postId || !imageSrc) {
+        console.error('Error: ID o imagen no proporcionados.');
+        return;
+      }
+      const imagePlaceholder = document.querySelector('.image-placeholder');
+      imagePlaceholder.style.backgroundImage = `url(${imageSrc})`;
+      imagePlaceholder.style.backgroundSize = 'contain';
+      imagePlaceholder.style.backgroundPosition = 'center';
+      imagePlaceholder.style.backgroundRepeat = 'no-repeat';
+      parent.postMessage({ action: 'iframeLoaded', id: postId }, '*');
+
+      
+      const email = localStorage.getItem('email');
+      const profileCircle = document.querySelector('.profile-circle');
+      const userProfileCircle = document.getElementById('user-profile-circle');
+      const usernameSpan = document.querySelector('.post-header span');
+      const postDescription = document.getElementById('postDescription');
+      if (!email) {
+        alert('No se encontró el email del usuario.');
+        return;
+      }
+      fetch('http://localhost:5000/api/perfil/datos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            profileCircle.style.backgroundImage = `url(${data.fotoPerfil || 'img/perfil.jpg'})`;
+            userProfileCircle.style.backgroundImage = `url(${data.fotoPerfil || 'img/perfil.jpg'})`;
+            usernameSpan.textContent = data.username || 'Usuario';
+            const publicaciones = data.contenido;
+            const publicacion = publicaciones.find((pub) => pub.id === postId);
+            if (publicacion) {
+              postDescription.textContent = publicacion.contenido || 'Sin descripción';
+              likes = publicacion.likes || 0;
+              comments = publicacion.comentarios || [];
+              updatePost();
+              const fechaOriginal = new Date(publicacion.fecha);
+              const fechaFormateada = `${fechaOriginal.getDate().toString().padStart(2, '0')}/${(fechaOriginal.getMonth() + 1)
+                .toString().padStart(2, '0')}/${fechaOriginal.getFullYear()}`;
+              const fechaElement = document.createElement('p');
+              fechaElement.textContent = `Publicado el: ${fechaFormateada}`;
+              fechaElement.style.fontSize = '12px';
+              fechaElement.style.color = '#666';
+              postDescription.appendChild(fechaElement);
+            } else {
+              postDescription.textContent = 'Publicación no encontrada.';
+            }
+          } else {
+            console.error('Error al obtener los datos:', data.message);
+            postDescription.textContent = 'Error al cargar la descripción.';
+          }
+        })
+        .catch((error) => {
+          console.error('Error al cargar los datos:', error);
+          postDescription.textContent = 'Error al cargar la descripción.';
+        });
+    });
+
+    const socket = io('http://localhost:5000');
+    socket.on('updateLikes', (data) => {
+      if (data.postId === postId) {
+        likes = data.likes;
+        updatePost();
+      }
+    });
+    socket.on('updateComments', (data) => {
+  console.log("Comentarios recibidos por Socket.io:", data.comments);
+  if (data.postId === postId) {
+    comments = data.comments;
+    updateCommentsList();
+  }
+});
+
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interfaz Simplificada</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap");
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Poppins", sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background: linear-gradient(to bottom, #d3d3d3, #ffffff);
+      background-attachment: fixed;
+      background-size: cover;
+      background-position: center;
+    }
+
+    .main-content {
+      margin-top: 100px;
+      margin-left: 160px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      width: calc(100% - 160px);
+      height: auto;
+    }
+
+    .options-bar {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: space-evenly;
+      position: fixed;
+      top: 0;
+      left: 0;
+      background: rgba(255, 255, 255, 0.9);
+      width: 170px;
+      height: 100%;
+      box-shadow: 2px 0px 5px rgba(0, 0, 0, 0.1);
+      padding: 20px 10px;
+      z-index: 1000;
+    }
+
+    .option {
+      display: flex;
+      align-items: center;
+    }
+
+    .options-bar img {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+      margin-right: 10px;
+    }
+
+    .options-bar img:hover {
+      transform: scale(1.1);
+    }
+
+    .option-text {
+      font-size: 14px;
+      font-weight: 400;
+      color: #333;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #db4437;
+      color: white;
+      position: fixed;
+      top: 0;
+      left: 170px; 
+      width: calc(100% - 170px);
+      height: 100px; 
+      padding: 0 20px;
+      box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+      z-index: 1001;
+    }
+
+    .header img {
+      height: 50px;
+      cursor: pointer;
+      position: absolute;
+      top: 25px; 
+      right: 20px; 
+    }
+
+    .buttons-container {
+      position: absolute;
+      top: 105px;
+      right: 2%;
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .action-button {
+      padding: 15px 30px;
+      font-size: 16px;
+      color: white;
+      background-color: #db4437;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .action-button:hover {
+      background-color: #b33c2c;
+    }
+  </style>
+</head>
+<body>
+   <div class="options-bar">
+    <div class="option">
+        <a href="perfil.html">
+            <img src="usuario.png" alt="Usuario">
+            <span class="option-text">Usuario</span>
+        </a>
+    </div>
+    <div class="option">
+      <a href="eventos.html">
+          <img src="eventos.png" alt="Eventos">
+          <span class="option-text">Eventos</span>
+      </a>
+  </div>
+     <div class="option">
+        <a href="pruebacale.html">
+            <img src="calendario.png" alt="Calendario">
+            <span class="option-text">Calendario</span>
+        </a>
+    </div>
+  <div class="option">
+     <a href="lives.html">
+         <img src="lives.png" alt="Lives">
+         <span class="option-text">LIVES</span>
+     </a>
+ </div>
+</div>
+
+<div class="header">
+    <img src="img/AthleticXs.png" alt="AthleticXs">
+    <button class="action-button" onclick="window.location.href='usuarios.html'">Ir a Usuarios</button>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const userEmail = localStorage.getItem('email');
+  const username = localStorage.getItem('username');
+  const dob = localStorage.getItem('dob');
+
+  console.log("Correo en localStorage:", userEmail);
+  console.log("Username en localStorage:", username);
+  console.log("Fecha de nacimiento en localStorage:", dob);
+
+  if (!userEmail || !username || !dob) {
+    console.warn("No se encontró toda la información en localStorage. Redirigiendo a registro...");
+    alert("No se encontró la información completa del usuario. Redirigiendo a registro.");
+    window.location.href = 'registro.html';
+  } else {
+    console.log("Usuario autenticado:", userEmail);
+    const optionsBar = document.querySelector('.options-bar');
+    if (optionsBar) {
+      optionsBar.insertAdjacentHTML('beforeend', `
+        <div class="option">
+          <span class="option-text">Bienvenido, ${username}</span>
+        </div>
+        <div class="option">
+          <span class="option-text">Fecha de Nacimiento: ${dob}</span>
+        </div>
+      `);
+    }
+  }
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

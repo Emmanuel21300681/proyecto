@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modificar Evento</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap");
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(to right, #e3e3e3, #ffffff);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .form-container {
+      background: #fff;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 700px;
+      transition: transform 0.2s ease-in-out;
+    }
+
+    .form-container:hover {
+      transform: scale(1.02);
+    }
+
+    .form-container h1 {
+      font-size: 26px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      text-align: center;
+      color: #333;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 15px;
+      margin-bottom: 6px;
+      color: #555;
+      font-weight: 500;
+    }
+
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      outline: none;
+      transition: border-color 0.3s ease;
+    }
+
+    .form-group textarea {
+      resize: none;
+      height: 100px;
+    }
+
+    .file-input-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 400px;
+  height: 220px;
+  background-color: #f8f9fa;
+  border: 2px dashed #aaa;
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+  margin: 0 auto; /* Centra el contenedor horizontalmente */
+}
+
+
+
+    .file-input-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 10px;
+    }
+
+    .file-input-container input {
+      display: none;
+    }
+
+    .file-input-container label {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.4);
+      color: white;
+      font-size: 24px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .file-input-container:hover label {
+      background: rgba(0, 0, 0, 0.6);
+    }
+
+    .change-photo-button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      font-size: 20px;
+      cursor: pointer;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .change-photo-button:hover {
+      background-color: #d11616;
+    }
+
+    /* 🔹 Duración - Checkboxes alineados a la izquierda */
+    .duracion-container {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-top: 10px;
+    }
+
+    .duracion-container label {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+    }
+
+    /* 🔹 Estilos para las etiquetas */
+    .etiquetas-container {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .add-tag {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .add-tag input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    .add-tag button {
+      padding: 10px 15px;
+      background-color: #d11616;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .add-tag button:hover {
+      background-color: #d11616;
+    }
+
+    /* 🔹 Visualización de etiquetas agregadas */
+    .etiquetas-container .tag {
+      display: flex;
+      align-items: center;
+      background: #d11616;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+
+    .tag button {
+      background: transparent;
+      border: none;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+      margin-left: 8px;
+    }
+
+    /* 🔹 Botón de guardar */
+    .button-container {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .guardar-evento {
+      background-color: #28a745;
+      color: white;
+      padding: 12px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .guardar-evento:hover {
+      background-color: #218838;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="form-container">
+    <h1>Modificar Evento</h1>
+    <form id="formModificarEvento">
+      <div class="form-group">
+        <label for="nombreEvento">Nombre del Evento</label>
+        <input type="text" id="nombreEvento" name="nombre" required>
+      </div>
+
+      <div class="form-group">
+        <label for="descripcionEvento">Descripción</label>
+        <textarea id="descripcionEvento" name="descripcion" required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="ubicacionEvento">Ubicación</label>
+        <input type="text" id="ubicacionEvento" name="ubicacion" required>
+      </div>
+
+      <div class="form-group">
+        <label for="costoEvento">Costo</label>
+        <input type="text" id="costoEvento" name="costo" required>
+      </div>
+
+      <div class="form-group">
+        <label for="fechaEvento">Fecha</label>
+        <input type="date" id="fechaEvento" name="fecha" required>
+      </div>
+
+      <div class="form-group">
+        <label for="horaEvento">Hora</label>
+        <input type="time" id="horaEvento" name="hora" required>
+      </div>
+
+      <div class="form-group">
+        <label>Duración</label>
+        <input type="number" id="duracionEvento" name="duracionValue" min="1" required>
+        <div class="duracion-container">
+          <label><input type="radio" name="duracionUnit" value="minutes"> Minutos</label>
+          <label><input type="radio" name="duracionUnit" value="hours"> Horas</label>
+          <label><input type="radio" name="duracionUnit" value="undefined"> Indefinido</label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Etiquetas</label>
+        <div class="add-tag">
+          <input type="text" id="evento-tags" placeholder="Añadir etiqueta">
+          <button type="button" id="add-tag">+</button>
+        </div>
+        <div class="etiquetas-container" id="tags-container"></div>
+      </div>
+
+      <div class="form-group">
+        <label for="evento-image">Imagen</label>
+        <div class="file-input-container">
+          <img id="preview-image" src="" alt="Imagen del evento">
+          <input type="file" id="evento-image" name="imagen">
+          <button type="button" class="change-photo-button">+</button>
+        </div>
+      </div>
+
+
+      <div class="button-container">
+        <button type="submit" class="guardar-evento">Guardar Evento</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    let etiquetas = [];
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      const params = new URLSearchParams(window.location.search);
+      const eventoId = params.get("id");
+
+      if (!eventoId) {
+        alert("No se encontró el ID del evento.");
+        return;
+      }
+
+      try {
+        const response = await fetch(`http://localhost:5000/api/eventos/evento/${eventoId}`);
+        const data = await response.json();
+
+        if (data.success) {
+          const evento = data.evento;
+
+          document.getElementById("nombreEvento").value = evento.nombre;
+          document.getElementById("descripcionEvento").value = evento.descripcion;
+          document.getElementById("ubicacionEvento").value = evento.ubicacion;
+          document.getElementById("costoEvento").value = evento.costo;
+          document.getElementById("fechaEvento").value = evento.fecha;
+          document.getElementById("horaEvento").value = evento.hora;
+
+          if (evento.duracion) {
+            document.getElementById("duracionEvento").value = evento.duracion.value;
+            document.querySelector(`input[name="duracionUnit"][value="${evento.duracion.unit}"]`).checked = true;
+            if (evento.duracion.unit === "undefined") {
+              document.getElementById("duracionEvento").disabled = true;
+            }
+          }
+
+          if (evento.imagen) {
+            document.getElementById("preview-image").src = evento.imagen;
+          }
+
+          // 🔹 Cargar etiquetas del evento si existen
+          if (evento.etiquetas && Array.isArray(evento.etiquetas)) {
+            etiquetas = evento.etiquetas;
+            actualizarEtiquetas();
+          }
+        }
+      } catch (error) {
+        console.error("Error al obtener datos del evento:", error);
+      }
+    });
+
+    // 🔹 Agregar una etiqueta desde el input
+    document.getElementById("add-tag").addEventListener("click", () => {
+      const tagInput = document.getElementById("evento-tags");
+      const tagValue = tagInput.value.trim();
+
+      if (tagValue && !etiquetas.includes(tagValue)) {
+        etiquetas.push(tagValue);
+        actualizarEtiquetas();
+        tagInput.value = "";
+      }
+    });
+
+    // 🔹 Mostrar etiquetas en la interfaz
+    function actualizarEtiquetas() {
+      const container = document.getElementById("tags-container");
+      container.innerHTML = "";
+
+      etiquetas.forEach(tag => {
+        const tagElement = document.createElement("div");
+        tagElement.classList.add("tag");
+        tagElement.innerHTML = `${tag} <button onclick="eliminarEtiqueta('${tag}')">x</button>`;
+        container.appendChild(tagElement);
+      });
+    }
+
+    // 🔹 Eliminar una etiqueta de la lista
+    function eliminarEtiqueta(tag) {
+      etiquetas = etiquetas.filter(t => t !== tag);
+      actualizarEtiquetas();
+    }
+
+    // 🔹 Cambiar la imagen al hacer clic en el botón de "+"
+    document.querySelector(".change-photo-button").addEventListener("click", () => {
+      document.getElementById("evento-image").click();
+    });
+
+    // 🔹 Mostrar la imagen seleccionada
+    document.getElementById("evento-image").addEventListener("change", function() {
+      const file = this.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          document.getElementById("preview-image").src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+  const params = new URLSearchParams(window.location.search);
+  const eventoId = params.get("id");
+  const addToCalendarCheckbox = document.getElementById("add-to-calendar");
+const agregarCalendario = addToCalendarCheckbox ? addToCalendarCheckbox.checked : false;
+
+
+  if (!eventoId) {
+    alert("No se encontró el ID del evento.");
+    return;
+  }
+
+  try {
+    const response = await fetch(`http://localhost:5000/api/eventos/evento/${eventoId}`);
+    const data = await response.json();
+
+    if (data.success) {
+      const evento = data.evento;
+
+      document.getElementById("nombreEvento").value = evento.nombre;
+      document.getElementById("descripcionEvento").value = evento.descripcion;
+      document.getElementById("ubicacionEvento").value = evento.ubicacion;
+      document.getElementById("costoEvento").value = evento.costo;
+      document.getElementById("fechaEvento").value = evento.fecha;
+      document.getElementById("horaEvento").value = evento.hora;
+      document.getElementById("duracionEvento").value = evento.duracion.value;
+      document.querySelector(`input[name="duracionUnit"][value="${evento.duracion.unit}"]`).checked = true;
+      
+      if (evento.imagen) {
+        document.getElementById("preview-image").src = evento.imagen;
+      }
+
+      if (evento.etiquetas && Array.isArray(evento.etiquetas)) {
+        etiquetas = evento.etiquetas;
+        actualizarEtiquetas();
+      }
+    }
+  } catch (error) {
+    console.error("Error al obtener datos del evento:", error);
+  }
+});
+
+// 🔥 Enviar datos actualizados al backend
+document.getElementById("formModificarEvento").addEventListener("submit", async function (event) {
+  event.preventDefault();
+
+  const params = new URLSearchParams(window.location.search);
+  const eventoId = params.get("id");
+
+  if (!eventoId) {
+    alert("No se encontró el ID del evento.");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("nombre", document.getElementById("nombreEvento").value);
+  formData.append("descripcion", document.getElementById("descripcionEvento").value);
+  formData.append("ubicacion", document.getElementById("ubicacionEvento").value);
+  formData.append("costo", document.getElementById("costoEvento").value);
+  formData.append("fecha", document.getElementById("fechaEvento").value);
+  formData.append("hora", document.getElementById("horaEvento").value);
+  formData.append("duracionValue", document.getElementById("duracionEvento").value);
+  formData.append("duracionUnit", document.querySelector('input[name="duracionUnit"]:checked').value);
+  formData.append("etiquetas", etiquetas.join(","));
+
+  
+  const imagenInput = document.getElementById("evento-image").files[0];
+  if (imagenInput) {
+    formData.append("imagen", imagenInput);
+  }
+
+  try {
+    const response = await fetch(`http://localhost:5000/api/eventos/modificar/${eventoId}`, {
+      method: "PUT",
+      body: formData,
+    });
+
+    const data = await response.json();
+
+    
+    if (data.success) {
+  alert("Evento modificado con éxito.");
+
+  // 🔥 Enviar mensaje a `miseventos.html` para cerrar el modal
+  window.parent.postMessage({ action: "cerrarModal" }, "*");
+
+  // 🔄 Refrescar eventos sin recargar toda la página
+  window.parent.dispatchEvent(new Event("eventoModificado"));
+}
+
+ else {
+      alert("Error al modificar el evento: " + data.message);
+    }
+  } catch (error) {
+    console.error("Error al modificar evento:", error);
+    alert("Error del servidor.");
+  }
+});
+
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,453 @@
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calificaciones y Reseñas</title>
+  <style>
+
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f9;
+      color: #333;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    h1, h2, h3 {
+      color: #3A8DFF;
+    }
+
+
+    .post-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .profile-circle {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: #ccc;
+      background-size: cover;
+      background-position: center;
+      margin-right: 15px;
+    }
+
+    .event-name {
+      font-size: 24px;
+      font-weight: bold;
+      color: #333;
+      margin-right: 10px;
+    }
+
+    .event-rating {
+      display: flex;
+      align-items: center;
+    }
+
+    .event-rating .stars {
+      display: flex;
+      align-items: center;
+    }
+
+    .event-rating .stars .star {
+      font-size: 20px;
+      color: #ffcc00;
+      margin-right: 2px;
+    }
+
+    .event-rating .average {
+      font-size: 18px;
+      font-weight: bold;
+      margin-left: 10px;
+      color: #333;
+    }
+
+
+    .rating-stars {
+      display: flex;
+      justify-content: center;
+      margin: 20px 0;
+    }
+
+    .star {
+      font-size: 30px;
+      color: #ccc;
+      cursor: pointer;
+      margin: 0 5px;
+      transition: color 0.3s ease;
+    }
+
+    .star.active, .star:hover {
+      color: #ffcc00;
+    }
+
+
+    .reviews-section {
+      margin-top: 30px;
+    }
+
+    .reviews-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .reviews-header h3 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .reviews-header i {
+      font-size: 24px;
+      cursor: pointer;
+      color: #3A8DFF;
+    }
+
+    .review {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 15px;
+      padding: 15px;
+      background-color: #f9f9f9;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .review .profile-circle {
+      width: 40px;
+      height: 40px;
+      margin-right: 10px;
+    }
+
+    .review p {
+      margin: 0;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .review strong {
+      color: #333;
+    }
+
+    .review-box {
+      display: flex;
+      align-items: center;
+      margin-top: 20px;
+    }
+
+    .review-box textarea {
+      flex-grow: 1;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      resize: none;
+      font-size: 14px;
+      color: #333;
+      background-color: #f9f9f9;
+    }
+
+    .review-box textarea:focus {
+      outline: none;
+      border-color: #3A8DFF;
+      box-shadow: 0 0 5px rgba(58, 141, 255, 0.3);
+    }
+
+    .review-box button {
+      margin-left: 10px;
+      padding: 10px 20px;
+      background-color: #3A8DFF;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s ease;
+    }
+
+    .review-box button:hover {
+      background-color: #2a6fd1;
+    }
+
+    .no-reviews {
+      text-align: center;
+      color: #888;
+      font-style: italic;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    
+    <div class="post-header">
+      <div class="profile-circle" id="event-image"></div>
+      <div>
+        <span class="event-name" id="event-name">Nombre del Evento</span>
+        <div class="event-rating" id="event-rating">
+          <div class="stars">
+            <span class="star">&#9733;</span>
+            <span class="star">&#9733;</span>
+            <span class="star">&#9733;</span>
+            <span class="star">&#9733;</span>
+            <span class="star">&#9733;</span>
+          </div>
+          <span class="average" id="average-rating">0.0</span>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="rating-stars" id="rating-stars">
+      <span class="star" data-value="1">&#9733;</span>
+      <span class="star" data-value="2">&#9733;</span>
+      <span class="star" data-value="3">&#9733;</span>
+      <span class="star" data-value="4">&#9733;</span>
+      <span class="star" data-value="5">&#9733;</span>
+    </div>
+
+    <div class="reviews-section">
+      <div class="reviews-header">
+        <h3>Reseñas</h3>
+        <i onclick="toggleReviews()">📄</i>
+      </div>
+      <div id="reviews-list"></div>
+      <div class="review-box">
+        <textarea id="review-input" placeholder="Escribe tu reseña..."></textarea>
+        <button onclick="submitReview()">Enviar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let eventId; 
+    let userId; 
+    let userRating = 0; 
+    let reviews = []; 
+
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      eventId = urlParams.get('id'); 
+      userId = localStorage.getItem('userId'); 
+      username = localStorage.getItem('username');
+      userFoto = localStorage.getItem('fotoPerfil');
+
+      if (!eventId || !userId) {
+        alert('Error: No se pudo cargar el evento o el usuario.');
+        return;
+      }
+
+      
+      fetch(`http://localhost:5000/api/eventos/evento/${eventId}`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`Error en la solicitud: ${response.status} ${response.statusText}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.success) {
+            const evento = data.evento;
+            document.getElementById('event-name').textContent = evento.nombre;
+
+            
+            const eventImage = document.getElementById('event-image');
+            if (evento.imagen) {
+              eventImage.style.backgroundImage = `url('${evento.imagen}')`;
+            }
+
+            
+            const averageRating = calcularPromedioCalificaciones(evento.calificaciones);
+            document.getElementById('average-rating').textContent = averageRating.toFixed(1);
+            actualizarEstrellasPromedio(averageRating);
+          } else {
+            console.error('Error al cargar el evento:', data.message);
+            alert("No se pudo cargar el evento. Inténtalo de nuevo más tarde.");
+          }
+        })
+        .catch(error => {
+          console.error('Error al obtener el evento:', error);
+          alert("Error del servidor al cargar el evento.");
+        });
+
+      
+      fetch(`http://localhost:5000/api/eventos/resenas/${eventId}`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error("Error al cargar las reseñas.");
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.success) {
+            reviews = data.resenas || []; 
+            updateReviewsList();
+          } else {
+            console.error('Error al cargar las reseñas:', data.message);
+            alert("No se pudieron cargar las reseñas. Inténtalo de nuevo más tarde.");
+          }
+        })
+        .catch(error => {
+          console.error('Error al obtener las reseñas:', error);
+          alert("Error del servidor al cargar las reseñas.");
+        });
+    });
+
+    
+    function calcularPromedioCalificaciones(calificaciones) {
+      if (!calificaciones || calificaciones.length === 0) return 0;
+      const total = calificaciones.reduce((sum, cal) => sum + cal.calificacion, 0);
+      return total / calificaciones.length;
+    }
+
+    
+    function actualizarEstrellasPromedio(promedio) {
+      const stars = document.querySelectorAll('.event-rating .stars .star');
+      stars.forEach((star, index) => {
+        if (index < Math.round(promedio)) {
+          star.style.color = '#ffcc00';
+        } else {
+          star.style.color = '#ccc';
+        }
+      });
+    }
+
+    
+    function updateReviewsList() {
+      const reviewsList = document.getElementById('reviews-list');
+
+      
+      if (reviews.length === 0) {
+        reviewsList.innerHTML = "<p class='no-reviews'>No hay reseñas para este evento.</p>";
+        return;
+      }
+
+     
+      reviewsList.innerHTML = reviews.map(review => `
+        <div class="review">
+          <div class="profile-circle" style="background-image: url('${review.usuario.fotoPerfil || 'img/perfil.jpg'}');"></div>
+          <p><strong>${review.usuario.username}:</strong> ${review.contenido}</p>
+        </div>
+      `).join('');
+    }
+
+    
+    function submitReview() {
+  const reviewInput = document.getElementById('review-input');
+  const reviewText = reviewInput.value.trim();
+
+  if (!reviewText) {
+    alert('Por favor, escribe una reseña.');
+    return;
+  }
+
+  fetch('http://localhost:5000/api/eventos/agregar-resena', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId, eventId, contenido: reviewText }),
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`Error en la solicitud: ${response.status} ${response.statusText}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      if (data.success) {
+        
+        const nuevaResena = {
+          usuario: {
+            _id: userId,
+            username: localStorage.getItem("username") || "Tú",
+            fotoPerfil: localStorage.getItem("fotoPerfil") || "img/perfil.jpg"
+          },
+          contenido: reviewText,
+          fecha: new Date().toISOString(),
+        };
+
+        
+        reviews.unshift(nuevaResena);
+        updateReviewsList();
+        reviewInput.value = ''; 
+      } else {
+        console.error('Error al agregar la reseña:', data.message);
+        alert("No se pudo agregar la reseña. Inténtalo de nuevo más tarde.");
+      }
+    })
+    .catch(error => {
+      console.error('Error al enviar la reseña:', error);
+      alert("Error del servidor al enviar la reseña.");
+    });
+}
+
+
+   
+    const stars = document.querySelectorAll('.rating-stars .star');
+    stars.forEach(star => {
+      star.addEventListener('click', () => {
+        const value = parseInt(star.getAttribute('data-value'));
+        userRating = value;
+        updateStars();
+        submitRating();
+      });
+    });
+
+    
+    function updateStars() {
+      stars.forEach((star, index) => {
+        if (index < userRating) {
+          star.classList.add('active');
+        } else {
+          star.classList.remove('active');
+        }
+      });
+    }
+
+   
+    function submitRating() {
+      fetch('http://localhost:5000/api/eventos/calificar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, eventId, calificacion: userRating }),
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`Error en la solicitud: ${response.status} ${response.statusText}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (!data.success) {
+            console.error('Error al enviar la calificación:', data.message);
+            alert("No se pudo enviar la calificación. Inténtalo de nuevo más tarde.");
+          }
+        })
+        .catch(error => {
+          console.error('Error al enviar la calificación:', error);
+          alert("Error del servidor al enviar la calificación.");
+        });
+    }
+
+    
+    function toggleReviews() {
+      const reviewsList = document.getElementById('reviews-list');
+      reviewsList.style.display = reviewsList.style.display === 'none' ? 'block' : 'none';
+    }
+  </script>
+</body>
+</html>

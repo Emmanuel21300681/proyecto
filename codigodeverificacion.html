@@ -1,0 +1,197 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Codigo de verificacion</title>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap");
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      background: linear-gradient(to bottom, #d63031, #b71c1c);
+      align-items: center;
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(to bottom, #d63031, #b71c1c);
+      margin: 0;
+      height: 100vh;
+    }
+
+    .container {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+      width: 400px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+
+    p {
+      font-size: 16px;
+      color: #555;
+      margin-bottom: 20px;
+    }
+
+    .verification-code {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .verification-code input {
+      width: 50px;
+      height: 50px;
+      font-size: 24px;
+      text-align: center;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+
+    .verification-code input:focus {
+      border-color: #db4437;
+      outline: none;
+    }
+
+    button {
+      background: #db4437;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #c0392b;
+    }
+
+    .resend-link {
+      display: block;
+      margin-bottom: 20px;
+      font-size: 14px;
+      color: #007BFF;
+      text-decoration: underline;
+      transition: color 0.3s;
+    }
+
+    .resend-link:hover {
+      color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Codigo de verificación</h1>
+    <p>Hola <strong id="username"></strong>, te mandamos un código de verificación a tu dirección de correo electrónico.</p>
+    <a href="#" class="resend-link" id="resend-link">Volver a mandar</a>
+    <div class="verification-code">
+      <input type="text" maxlength="1" id="code-1">
+      <input type="text" maxlength="1" id="code-2">
+      <input type="text" maxlength="1" id="code-3">
+      <input type="text" maxlength="1" id="code-4">
+    </div>
+    <button id="verify-btn">Confirmar</button>
+  </div>
+
+  <script>
+document.addEventListener('DOMContentLoaded', () => {
+  
+  document.getElementById('verify-btn').addEventListener('click', function () {
+    
+    const code =
+      document.getElementById('code-1').value +
+      document.getElementById('code-2').value +
+      document.getElementById('code-3').value +
+      document.getElementById('code-4').value;
+
+    
+    if (code.length !== 4) {
+      alert('Por favor ingresa el código completo.');
+      return;
+    }
+
+  
+    const email = localStorage.getItem('email');
+
+    if (!email) {
+      alert('No se encontró un correo registrado. Por favor, regístrate nuevamente.');
+      return;
+    }
+
+    fetch('http://localhost:5000/api/verificar-codigo', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, code }),
+    })
+      .then((response) => response.json())
+      .then((result) => {
+        if (result.success) {
+          alert('Verificación exitosa. Redirigiendo a inicio de sesión...');
+          window.location.href = 'registro.html'; 
+        } else {
+          alert('Error en la verificación: ' + result.message);
+        }
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+        alert('Ocurrió un error al verificar. Intenta más tarde.');
+      });
+  });
+
+
+  document.getElementById('resend-link').addEventListener('click', function (e) {
+    e.preventDefault(); 
+
+    const email = localStorage.getItem('email'); 
+
+    if (!email) {
+      alert('No se encontró un correo registrado. Por favor, regístrate nuevamente.');
+      return;
+    }
+
+  
+    fetch('http://localhost:5000/api/reenviar-codigo', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    })
+      .then((response) => response.json())
+      .then((result) => {
+        if (result.success) {
+          alert('El código de verificación se ha enviado nuevamente a tu correo.');
+        } else {
+          alert('Error al reenviar el código: ' + result.message);
+        }
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+        alert('Ocurrió un error al intentar reenviar el código. Intenta más tarde.');
+      });
+  });
+
+
+  const email = localStorage.getItem('email');
+  if (email) {
+    const username = email.split('@')[0]; 
+    document.getElementById('username').textContent = username;
+  }
+});
+
+
+  </script>
+</body>
+</html>

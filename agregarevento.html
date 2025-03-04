@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="es"> 
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nuevo Evento</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(to bottom, #f0f0f0, #ffffff);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .form-container {
+      background: #fff;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 600px;
+    }
+    .form-container h1 {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: #333;
+      text-align: center;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 8px;
+      color: #555;
+      font-weight: 500;
+    }
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px;
+      font-size: 14px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      transition: border-color 0.3s ease;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus {
+      border-color: #a72828;
+      outline: none;
+    }
+    .file-input-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      height: 200px;
+      background-color: #f8f9fa;
+      border: 2px dashed #ccc;
+      border-radius: 10px;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      transition: border-color 0.3s ease;
+    }
+    .file-input-container:hover {
+      border-color: #a72828;
+    }
+    .file-input-container label {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.4);
+      color: white;
+      font-size: 32px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    .file-input-container label:hover {
+      background: rgba(0, 0, 0, 0.6);
+    }
+    .file-input-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none;
+    }
+    .file-input-container input[type="file"] {
+      display: none; 
+    }
+    .add-tag {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .add-tag input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+    .add-tag button {
+      padding: 10px 15px;
+      background-color: #a72828;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .add-tag button:hover {
+      background-color: #a72828;
+    }
+    .tags-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .tag {
+      background-color: #db4437;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .tag button {
+      background: transparent;
+      border: none;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .checkbox-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .checkbox-container label {
+      margin: 0;
+      font-size: 14px;
+      color: #555;
+      font-weight: 500;
+    }
+    .button-container {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+    .button-container button {
+      padding: 12px 24px;
+      font-size: 16px;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .share-live {
+      background-color: #a72828;
+    }
+    .share-live:hover {
+      background-color: #a72828;
+    }
+    .time-options {
+      display: flex;
+      gap: 15px; 
+      margin-top: 10px; 
+    }
+
+
+    .stacked-checkboxes {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    
+
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <h1>Nuevo Evento</h1>
+    <form id="evento-form">
+      <div class="form-group">
+        <label for="evento-name">Nombre del Evento</label>
+        <input type="text" id="evento-name" required>
+      </div>
+      <div class="form-group">
+        <label for="evento-description">Descripción</label>
+        <textarea id="evento-description" rows="4" required></textarea>
+      </div>
+      <div class="form-group">
+        <label for="ubicacion">Ubicación</label>
+        <input type="text" id="ubicacion" required>
+      </div>
+      <div class="form-group">
+        <label for="costo">Costo</label>
+        <input type="text" id="costo" required>
+      </div>
+      <div class="form-group">
+        <label for="evento-date">Fecha</label>
+        <input type="date" id="evento-date" required>
+      </div>
+      <div class="form-group">
+        <label for="evento-time">Hora</label>
+        <input type="time" id="evento-time" required>
+      </div>
+
+      <div class="form-group">
+        <label for="event-duration">Duración</label>
+        <input type="number" id="event-duration" placeholder="Tiempo" required>
+        <div class="time-options">
+          <label>
+            <input type="radio" name="time-unit" value="hours" onclick="document.getElementById('event-duration').disabled = false;">
+            Horas
+          </label>
+          <label>
+            <input type="radio" name="time-unit" value="minutes" onclick="document.getElementById('event-duration').disabled = false;">
+            Minutos
+          </label>
+          <label>
+            <input type="radio" name="time-unit" value="undefined" onclick="document.getElementById('event-duration').disabled = true;">
+            Indefinido
+          </label>
+        </div>
+      </div>
+        
+      <div class="form-group">
+        <label>Etiquetas</label>
+        <div class="add-tag">
+          <input type="text" id="evento-tags" placeholder="Añadir etiqueta">
+          <button type="button" id="add-tag">+</button>
+        </div>
+        <div class="tags-container" id="tags-container"></div>
+      </div>
+      <div class="form-group">
+        <label for="evento-image">Imagen</label>
+        <div class="file-input-container">
+          <label for="evento-image">+</label>
+          <input type="file" id="evento-image" accept="image/*">
+          <img id="preview-image">
+        </div>
+      </div>
+      <div class="checkbox-container">
+        <input type="checkbox" id="add-to-calendar">
+        <label for="add-to-calendar">Agregar al Calendario</label>
+      </div>
+      <div class="button-container">
+        <button type="submit" class="share-live">Guardar Evento</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    let etiquetas = [];
+
+    document.getElementById("add-tag").addEventListener("click", () => {
+      const tagInput = document.getElementById("evento-tags");
+      const tagValue = tagInput.value.trim();
+      if (tagValue && !etiquetas.includes(tagValue)) {
+        etiquetas.push(tagValue);
+        actualizarEtiquetas();
+        tagInput.value = "";
+      }
+    });
+
+    function actualizarEtiquetas() {
+      const container = document.getElementById("tags-container");
+      container.innerHTML = "";
+      etiquetas.forEach(tag => {
+        const tagElement = document.createElement("div");
+        tagElement.classList.add("tag");
+        tagElement.innerHTML = `${tag} <button onclick="eliminarEtiqueta('${tag}')">x</button>`;
+        container.appendChild(tagElement);
+      });
+    }
+
+    function eliminarEtiqueta(tag) {
+      etiquetas = etiquetas.filter(t => t !== tag);
+      actualizarEtiquetas();
+    }
+
+    document.getElementById("evento-image").addEventListener("change", function (event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const preview = document.getElementById("preview-image");
+          preview.src = e.target.result;
+          preview.style.display = "block";
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    document.getElementById("evento-form").addEventListener("submit", async function (event) {
+  event.preventDefault();
+
+  const email = localStorage.getItem("email");
+  if (!email) {
+    alert("Usuario no autenticado.");
+    return;
+  }
+
+  try {
+    const nombre = document.getElementById("evento-name").value;
+    const descripcion = document.getElementById("evento-description").value;
+    const ubicacion = document.getElementById("ubicacion").value;
+    const costo = document.getElementById("costo").value;
+    const fecha = document.getElementById("evento-date").value;
+    const hora = document.getElementById("evento-time").value;
+    const duracionValue = document.getElementById("event-duration").value;
+    const duracionUnit = document.querySelector('input[name="time-unit"]:checked').value;
+    const agregarCalendario = document.getElementById("add-to-calendar").checked;
+    const imagen = document.getElementById("evento-image").files[0];
+
+    if (!nombre || !descripcion || !ubicacion || !costo || !fecha || !hora || !duracionUnit) {
+      alert("Todos los campos son obligatorios.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("nombre", nombre);
+    formData.append("descripcion", descripcion);
+    formData.append("ubicacion", ubicacion);
+    formData.append("costo", costo);
+    formData.append("fecha", fecha);
+    formData.append("hora", hora);
+    formData.append("duracionValue", duracionValue);
+    formData.append("duracionUnit", duracionUnit);
+    formData.append("etiquetas", etiquetas.join(","));
+    formData.append("agregarCalendario", agregarCalendario);
+    formData.append("email", email);
+    if (imagen) {
+      formData.append("imagen", imagen);
+    }
+
+    const eventoResponse = await fetch("http://localhost:5000/api/eventos/crear", {
+      method: "POST",
+      body: formData,
+    });
+
+    const eventoData = await eventoResponse.json();
+    if (eventoData.success) {
+      alert("Evento creado con éxito.");
+      window.parent.postMessage({ action: "cerrarModal" }, "*");
+      window.parent.dispatchEvent(new Event("eventoModificado"));
+
+      if (agregarCalendario) {
+        const eventoCalendario = {
+          email: email,
+          eventName: nombre,
+          days: {},
+          time: hora,
+          location: ubicacion,
+          date: fecha,
+          duration: { value: duracionValue, unit: duracionUnit },
+          type: "EVENTO",
+        };
+
+        const calendarioResponse = await fetch("http://localhost:5000/api/evento/agregar-evento-calendario", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(eventoCalendario),
+        });
+
+        const calendarioData = await calendarioResponse.json();
+        if (calendarioData.success) {
+          // Éxito
+        } else {
+          // Error
+        }
+      }
+
+      location.reload();
+    } else {
+      alert("Error al crear el evento: " + eventoData.message);
+    }
+  } catch (error) {
+    location.reload();
+  }
+});
+  </script>
+</body>
+</html>

@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perfil Deportista</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap");
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(to bottom, #f0f0f0, #ffffff);
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .form-container {
+      background: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 600px;
+    }
+
+    .form-container h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .profile-image-container {
+      position: relative;
+      width: 150px;
+      height: 150px;
+      margin: 0 auto 20px;
+      background-color: #e0e0e0; 
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: visible; 
+    }
+
+    .profile-image-container img {
+  width: 100%; 
+  height: 100%; 
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+
+    .upload-btn {
+      position: absolute;
+      top: 80%; 
+      left: 80%;
+      transform: translate(-50%, -50%);
+      background-color: rgba(0, 0, 0, 0.6);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 40px; 
+      height: 40px; 
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 36px;
+      cursor: pointer;
+      z-index: 10; 
+    }
+
+    .upload-btn:hover {
+      background-color: rgba(0, 0, 0, 0.8);
+    }
+
+    .upload-input {
+      display: none; 
+    }
+
+    .form-check {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .form-check-label {
+      font-size: 14px;
+      color: #555;
+      margin-left: -40px; 
+    }
+
+    .form-check-input {
+      margin-right: 10px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 5px;
+      color: #555;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 10px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      outline: none;
+      transition: border-color 0.3s ease;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      border-color: #007bff;
+    }
+  </style>
+</head>
+<body>
+  
+  <div class="form-container">
+    <h1>Apasionado</h1>
+    <div class="profile-image-container">
+
+      <img id="profile-preview" src="img/perfil.jpg" alt="Imagen de perfil">
+      <input type="file" id="profile-image" class="upload-input" accept="image/*" onchange="previewImage(event)">
+      <button class="upload-btn" onclick="document.getElementById('profile-image').click()">+</button>
+    </div>
+
+    <div class="form-check form-switch">
+      <label class="form-check-label" for="cuenta-privada">Cuenta Privada</label>
+      <input class="form-check-input" type="checkbox" id="cuenta-privada">
+    </div>
+
+    <form>
+      <div class="form-group">
+        <label for="usuario">Usuario</label>
+        <input type="text" id="usuario" name="usuario" placeholder="Ingresa tu usuario">
+      </div>
+
+      <div class="form-group">
+        <label for="nombre">Nombre</label>
+        <input type="text" id="nombre" name="nombre" placeholder="Ingresa tu nombre">
+      </div>
+
+      <div class="form-group">
+        <label for="edad">Edad</label>
+        <input type="number" id="edad" name="edad" placeholder="Ingresa tu edad">
+      </div>
+
+      <div class="form-group">
+        <label for="genero">Género</label>
+        <select id="genero" name="genero">
+          <option value="Masculino">Masculino</option>
+          <option value="Femenino">Femenino</option>
+          <option value="Prefiero-no-decirlo">Prefiero no decirlo</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="ubicacion">Ubicación</label>
+        <input type="text" id="ubicacion" name="ubicacion" placeholder="Ingresa tu ubicación">
+      </div>
+
+      <div class="form-group">
+        <label for="biografia">Biografía</label>
+        <textarea id="biografia" name="biografia" placeholder="Escribe tu biografía"></textarea>
+      </div>
+
+      <div class="button-container text-center">
+        <button type="submit" class="btn btn-primary">Crear perfil</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+  function previewImage(event) {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+    reader.onload = function () {
+      document.getElementById('profile-preview').src = reader.result;
+    };
+    if (file) {
+      reader.readAsDataURL(file);
+    }
+  }
+</script>
+
+
+<script>
+  
+  function calcularEdad(fechaNacimiento) {
+    const hoy = new Date();
+    const nacimiento = new Date(fechaNacimiento);
+    let edad = hoy.getFullYear() - nacimiento.getFullYear();
+    const mes = hoy.getMonth() - nacimiento.getMonth();
+    if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
+      edad--;
+    }
+    return edad;
+  }
+
+  
+  document.addEventListener('DOMContentLoaded', () => {
+    const email = localStorage.getItem('email'); 
+    if (!email) {
+      console.error('No se encontró el correo en localStorage.');
+      return;
+    }
+
+    fetch('http://localhost:5000/api/perfil/datos', {
+      method: 'POST', 
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }), 
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP Error: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((data) => {
+        if (data.success) {
+          
+          document.getElementById('usuario').value = data.username || '';
+          document.getElementById('edad').value = calcularEdad(data.dob);
+        } else {
+          console.error('Error del servidor:', data.message);
+        }
+      })
+      .catch((error) => console.error('Error en la llamada fetch:', error));
+  });
+</script>
+
+
+
+<script>
+  document.querySelector('form').addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const email = localStorage.getItem('email');
+    const fotoInput = document.getElementById('profile-image').files[0];
+
+    let fotoPerfil = '';
+    if (fotoInput) {
+      
+      const formData = new FormData();
+      formData.append('image', fotoInput);
+
+      try {
+        
+        const uploadResponse = await fetch('http://localhost:5000/api/imagen/upload', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!uploadResponse.ok) {
+          throw new Error('Error en la subida de la imagen');
+        }
+
+        const uploadResult = await uploadResponse.json();
+        if (uploadResult.success) {
+          
+          fotoPerfil = uploadResult.url;
+        } else {
+          alert('Error al subir la imagen: ' + uploadResult.message);
+          return;
+        }
+      } catch (error) {
+        console.error('Error al subir la imagen:', error);
+        alert('Error al subir la imagen.');
+        return;
+      }
+    }
+
+    const data = {
+      email,
+      nombre: document.getElementById('nombre').value,
+      genero: document.getElementById('genero').value,
+      ubicacion: document.getElementById('ubicacion').value,
+      biografia: document.getElementById('biografia').value,
+      cuentaPrivada: document.getElementById('cuenta-privada').checked,
+      fotoPerfil 
+    };
+
+    fetch('http://localhost:5000/api/perfil/guardar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('Perfil guardado correctamente.');
+
+          
+          const modalElement = window.parent.document.querySelector('#crearPerfilApasionadoModal');
+          if (modalElement) {
+            const modalInstance = window.parent.bootstrap.Modal.getInstance(modalElement);
+            if (modalInstance) {
+              modalInstance.hide();
+            }
+          }
+
+          
+          const backdrops = window.parent.document.querySelectorAll('.modal-backdrop');
+          backdrops.forEach(backdrop => backdrop.remove());
+
+         
+          window.parent.location.reload();
+        } else {
+          alert('Error: ' + data.message);
+        }
+      })
+      .catch(error => console.error('Error al guardar perfil:', error));
+  });
+</script>
+
+
+
+
+
+</body>
+</html>

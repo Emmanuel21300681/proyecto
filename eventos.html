@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eventos</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <style>
+
+    @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap");
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Poppins", sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background: linear-gradient(to bottom, #d3d3d3, #ffffff);
+      background-attachment: fixed;
+      background-size: cover;
+      background-position: center;
+    }
+
+    .main-content {
+      margin-top: 280px;
+      margin-left: 160px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      width: calc(100% - 160px);
+      height: auto;
+    }
+
+    .options-bar {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: space-evenly;
+      position: fixed;
+      top: 0;
+      left: 0;
+      background: rgba(255, 255, 255, 0.9);
+      width: 170px;
+      height: 100%;
+      box-shadow: 2px 0px 5px rgba(0, 0, 0, 0.1);
+      padding: 20px 10px;
+      z-index: 1000;
+    }
+
+    .option {
+      display: flex;
+      align-items: center;
+    }
+
+    .options-bar img {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+      margin-right: 10px;
+    }
+
+    .options-bar img:hover {
+      transform: scale(1.1);
+    }
+
+    .option-text {
+      font-size: 14px;
+      font-weight: 400;
+      color: #333;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: fixed;
+      top: 0;
+      left: 170px;
+      background: #db4437;
+      color: white;
+      width: calc(100% - 170px);
+      height: 80px;
+      padding: 0 20px;
+      font-size: 28px;
+      box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+      z-index: 1001;
+    }
+
+    .header h1 {
+      font-size: 36px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .header img {
+      height: 50px;
+      cursor: pointer;
+    }
+
+    .search-container {
+      position: absolute;
+      top: 20%;
+      left: 28%;
+      transform: translate(-30%, -50%);
+      padding: 10px;
+    }
+
+    .search-container input {
+      width: 650px;
+      padding: 0 20px;
+      outline: none;
+      box-sizing: border-box;
+      height: 60px;
+      color: #000;
+      border-radius: 50px;
+      font-size: 20px;
+      border: 1px solid #D50000;
+      transition: none;
+    }
+
+    .search-container ::placeholder {
+      color: grey;
+    }
+
+    .search-container .btn {
+      position: absolute;
+      right: 0;
+      top: 10px;
+      width: 60px;
+      height: 60px;
+      background: #050000;
+      line-height: 60px;
+      border-radius: 50%;
+      text-align: center;
+      cursor: pointer;
+      transition: .5s;
+    }
+
+    .search-container .btn i {
+      font-size: 25px;
+      color: white;
+      line-height: 0px;
+      transition: all .7s ease;
+    }
+
+    .search-container:hover i {
+      transform: rotate(-360deg);
+    }
+
+    .search-container .btn:hover {
+      background: #cc0000;
+    }
+
+    .buttons-container {
+      position: absolute;
+      top: 105px;
+      right: 1%;
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .action-button {
+      padding: 15px 25px;
+      font-size: 16px;
+      color: white;
+      background-color: #db4437;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .action-button:hover {
+      background-color: #b33c2c;
+    }
+
+    .modal-backdrop {
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+      background: rgba(255, 255, 255, 0.9);
+    }
+
+    a.action-button {
+      text-decoration: none;
+      color: white;
+      display: inline-block;
+      text-align: center;
+    }
+
+    .centered-text {
+      position: absolute;
+      z-index: 50;
+      top: 220px;
+      left: 430px;
+      font-size: 30px;
+      color: #4682B4;
+      text-align: left;
+    }
+
+    .main-content {
+      margin-left: -30px;
+    }
+
+    .event-card {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+      margin: 20px;
+      padding: 20px;
+      width: 150%;
+      max-width: 5000px;
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+      position: relative;
+    }
+
+    .event-card img {
+      width: 200px;
+      height: 200px;
+      border-radius: 10px;
+      object-fit: cover;
+    }
+
+    .event-card .info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .event-card h2 {
+      font-size: 24px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .event-card p {
+      font-size: 16px;
+      color: #555;
+      margin-bottom: 10px;
+    }
+
+    .event-card .etiquetas {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .event-card .etiqueta {
+      background-color: #969190;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+
+    .event-card .calificaciones {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 40px;
+    }
+
+    .event-card .calificaciones i {
+      color: #ccc;
+      font-size: 18px;
+    }
+
+    .event-card .calificaciones a {
+      color: #4682B4;
+      text-decoration: none;
+      font-size: 14px;
+      margin-left: 10px;
+    }
+
+    .event-card .calificaciones a:hover {
+      text-decoration: underline;
+    }
+
+    .event-card .boton-agregar {
+      padding: 10px 20px;
+      font-size: 14px;
+      color: white;
+      background-color: #28a745;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin-left: auto;
+    }
+
+    .event-card .boton-agregar.agregado {
+      background-color: #db4437;
+    }
+
+    .event-card .boton-agregar:hover {
+      opacity: 0.9;
+    }
+
+    .ver-detalles {
+      color: #4682B4;
+      text-decoration: none;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .ver-detalles:hover {
+      text-decoration: underline;
+    }
+
+    .modal-detalles .modal-content {
+  padding: 25px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(10px); 
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.modal-detalles .modal-header {
+  background: linear-gradient(135deg, #007bff, #0056b3); 
+  color: white;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  padding: 15px;
+  text-align: center;
+}
+
+.modal-detalles .modal-body {
+  display: flex;
+  flex-direction: row; 
+  align-items: center;
+  text-align: left;
+  gap: 25px;
+}
+
+.modal-detalles .modal-imagen {
+  max-width: 250px; 
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15); 
+}
+
+.modal-detalles .modal-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.modal-detalles h2 {
+  font-size: 26px;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+}
+
+.modal-detalles p {
+  font-size: 17px;
+  color: #444;
+  line-height: 1.4;
+}
+
+.modal-detalles .etiquetas {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.modal-detalles .etiqueta {
+  background: linear-gradient(135deg, #ff5733, #c70039); 
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease;
+}
+
+.modal-detalles .etiqueta:hover {
+  transform: scale(1.1);
+}
+
+.modal-detalles .boton-cerrar {
+  padding: 12px 18px;
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+  background: #db4437;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.modal-detalles .boton-cerrar:hover {
+  background-color: #b33c2c;
+  transform: scale(1.05);
+}
+
+.promedio-calificaciones {
+  font-size: 18px;
+  font-weight: bold;
+  color: #ffcc00; 
+  margin-right: 10px;
+}
+
+
+@media (max-width: 768px) {
+  .modal-detalles .modal-body {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .modal-detalles .modal-info {
+    text-align: center;
+    align-items: center;
+  }
+
+  .modal-detalles .modal-imagen {
+    max-width: 80%;
+  }
+}
+
+.estrellas {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  color: #ffcc00; 
+}
+
+.promedio-calificaciones {
+  font-size: 16px;
+  font-weight: bold;
+  margin-left: 5px;
+  color: #0d0b8f;
+}
+
+
+  </style>
+</head>
+<body>
+
+  <div class="buttons-container">
+    <button class="action-button" data-bs-toggle="modal" data-bs-target="#agregarLiveModal">Agregar Evento</button>
+    <a href="miseventos.html" class="action-button">Mis eventos</a>
+    <a href="pruebacale.html" class="action-button">Calendario</a>
+  </div>
+
+  <div class="options-bar">
+    <div class="option">
+      <img src="img/usuario.png" alt="Usuario">
+      <span class="option-text">Usuario</span>
+    </div>
+    <div class="option">
+      <img src="img/explorar.png" alt="Explorar">
+      <span class="option-text">Explorar</span>
+    </div>
+    <div class="option">
+      <img src="img/chats.png" alt="Chats">
+      <span class="option-text">Chats</span>
+    </div>
+    <div class="option">
+      <img src="img/grupo.png" alt="Grupo">
+      <span class="option-text">Grupo</span>
+    </div>
+    <div class="option">
+      <img src="img/foro.png" alt="Foro">
+      <span class="option-text">Foro</span>
+    </div>
+    <div class="option">
+      <img src="img/canal.png" alt="Canal">
+      <span class="option-text">Canal</span>
+    </div>
+    <div class="option">
+      <img src="img/evento.png" alt="Evento">
+      <span class="option-text">Evento</span>
+    </div>
+    <div class="option">
+      <img src="img/calendario.png" alt="Calendario">
+      <span class="option-text">Calendario</span>
+    </div>
+    <div class="option">
+      <img src="img/live.png" alt="Live">
+      <span class="option-text">Live</span>
+    </div>
+  </div>
+
+  <div class="header">
+    <h1>Eventos</h1>
+    <img src="img/AthleticXs.png" alt="AthleticXs">
+  </div>
+
+  <div class="search-container">
+    <input type="text" placeholder="Ubicación/Nombre/Etiquetas/Calificación">
+    <div class="btn">
+      <i class="fas fa-search"></i>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <div class="centered-text">
+      Sugerencias
+    </div>
+
+    <div id="eventos-container"></div>
+  </div>
+
+<div class="modal fade modal-detalles" id="detallesEventoModal" tabindex="-1" aria-labelledby="detallesEventoModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="detallesEventoModalLabel">Detalles del Evento</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+
+        <img id="modal-imagen" class="modal-imagen" src="" alt="Imagen del evento">
+        
+
+        <div class="modal-info">
+          <h2 id="modal-nombre"></h2>
+          <p><strong>Fecha:</strong> <span id="modal-fecha"></span></p>
+          <p><strong>Hora:</strong> <span id="modal-hora"></span></p>
+          <p><strong>Ubicación:</strong> <span id="modal-ubicacion"></span></p>
+          <p><strong>Costo:</strong> <span id="modal-costo"></span></p>
+          <p><strong>Descripción:</strong> <span id="modal-descripcion"></span></p>
+          <div class="etiquetas" id="modal-etiquetas"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="boton-cerrar" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+  <div class="modal fade" id="agregarLiveModal" tabindex="-1" aria-labelledby="agregarLiveModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="agregarLiveModalLabel"></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <iframe src="agregarevento.html" style="width: 100%; height: 500px; border: none;"></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+
+ 
+<div class="modal fade" id="calificacionesModal" tabindex="-1" aria-labelledby="calificacionesModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="calificacionesModalLabel">Calificaciones y Reseñas</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <iframe id="calificacionesIframe" src="" style="width: 100%; height: 500px; border: none;"></iframe>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+  const userEmail = localStorage.getItem('email'); 
+
+  if (!userEmail) {
+    console.warn("Usuario no autenticado. Redirigiendo a registro...");
+    alert("Usuario no autenticado. Redirigiendo a registro.");
+    window.location.href = 'registro.html'; 
+  } else {
+    try {
+      const response = await fetch("http://localhost:5000/api/eventos/obtener-userId-por-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: userEmail })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        const userId = data.userId;
+        const username = data.username || "Usuario";
+        const userFoto = data.fotoPerfil || "img/perfil.jpg";
+
+        console.log("Usuario autenticado. ID:", userId);
+        console.log("Nombre:", username);
+        console.log("Foto:", userFoto);
+
+        
+        localStorage.setItem('userId', userId);
+        localStorage.setItem('username', username);
+        localStorage.setItem('fotoPerfil', userFoto);
+
+        cargarEventos(userId); 
+      } else {
+        console.error("Error al obtener userId:", data.message);
+        alert("Error al autenticar al usuario. Redirigiendo a registro.");
+        window.location.href = 'registro.html';
+      }
+    } catch (error) {
+      console.error("Error al obtener userId:", error);
+      alert("Error del servidor. Redirigiendo a registro.");
+      window.location.href = 'registro.html';
+    }
+  }
+});
+
+async function cargarEventos(userId) {
+  try {
+    const response = await fetch(`http://localhost:5000/api/eventos/listar?userId=${userId}`);
+    const data = await response.json();
+
+    if (data.success) {
+      const eventosContainer = document.getElementById("eventos-container");
+      eventosContainer.innerHTML = "";
+
+      data.eventos.forEach(evento => {
+        const eventCard = document.createElement("div");
+        eventCard.className = "event-card";
+
+        
+        const promedioCalificaciones = evento.calificaciones && evento.calificaciones.length > 0
+          ? (evento.calificaciones.reduce((sum, cal) => sum + cal.calificacion, 0) / evento.calificaciones.length)
+          : 0;
+
+        const estrellasLlenas = Math.floor(promedioCalificaciones); 
+        const estrellaMedia = promedioCalificaciones - estrellasLlenas >= 0.5; 
+        const estrellasVacias = 5 - estrellasLlenas - (estrellaMedia ? 1 : 0); 
+
+        const estrellasHTML = `
+          ${"<i class='fas fa-star'></i>".repeat(estrellasLlenas)}
+          ${estrellaMedia ? "<i class='fas fa-star-half-alt'></i>" : ""}
+          ${"<i class='far fa-star'></i>".repeat(estrellasVacias)}
+        `;
+
+        eventCard.innerHTML = `
+          <img src="${evento.imagen}" alt="${evento.nombre}">
+          <div class="info">
+            <h2>${evento.nombre}</h2>
+            <p>${evento.fecha} - ${evento.hora}</p>
+            <p>${evento.ubicacion}</p>
+            <a class="ver-detalles" data-bs-toggle="modal" data-bs-target="#detallesEventoModal"
+              data-nombre="${evento.nombre}" 
+              data-imagen="${evento.imagen}" 
+              data-fecha="${evento.fecha}" 
+              data-hora="${evento.hora}" 
+              data-ubicacion="${evento.ubicacion}" 
+              data-descripcion="${evento.descripcion}"
+              data-costo="${evento.costo}"
+              data-etiquetas='${JSON.stringify(evento.etiquetas || [])}'
+              data-calificacion='${promedioCalificaciones.toFixed(1)}'>
+              Ver más detalles
+            </a>
+            <div class="etiquetas">
+              ${evento.etiquetas.map(etiqueta => `<span class="etiqueta">${etiqueta}</span>`).join("")}
+            </div>
+            <div class="calificaciones">
+              <div class="estrellas">
+                ${estrellasHTML}
+                <span class="promedio-calificaciones">${promedioCalificaciones.toFixed(1)}</span>
+              </div>
+              <a href="#" class="ver-calificaciones" data-bs-toggle="modal" data-bs-target="#calificacionesModal" data-event-id="${evento._id}">Ver calificaciones</a>
+              <button class="boton-agregar">${evento.agregarCalendario ? "Agregado" : "Agregar"}</button>
+            </div>
+          </div>
+        `;
+
+        
+        eventCard.querySelector(".ver-calificaciones").addEventListener("click", function (event) {
+          const eventId = event.target.getAttribute("data-event-id");
+          const calificacionesIframe = document.getElementById("calificacionesIframe");
+          calificacionesIframe.src = `calificaciones.html?id=${eventId}`;
+        });
+
+        
+        window.addEventListener("message", (event) => {
+          if (event.data.action === "cerrarModalCalificaciones") {
+            const modalCalificaciones = bootstrap.Modal.getInstance(document.getElementById("calificacionesModal"));
+            if (modalCalificaciones) {
+              modalCalificaciones.hide();
+            }
+          }
+        });
+
+        const botonAgregar = eventCard.querySelector(".boton-agregar");
+        if (evento.agregarCalendario) {
+          botonAgregar.classList.add("agregado");
+        }
+
+        botonAgregar.addEventListener("click", async () => {
+          const eventoId = evento._id; 
+
+          if (!userId) {
+            console.error("Usuario no autenticado.");
+            return;
+          }
+
+          if (botonAgregar.textContent === "Agregar") {
+            try {
+              const response = await fetch("http://localhost:5000/api/eventos/agregar-evento-calendario", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                  userId,
+                  eventoId,
+                  agregarCalendario: true
+                })
+              });
+
+              if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || "Error en la solicitud.");
+              }
+
+              const data = await response.json();
+
+              if (data.success) {
+                botonAgregar.textContent = "Agregado";
+                botonAgregar.classList.add("agregado");
+              } else {
+                console.error("Error al agregar evento:", data.message);
+                alert("Error al agregar evento: " + data.message);
+              }
+            } catch (error) {
+              console.error("Error al agregar evento:", error);
+              alert("Error al agregar evento: " + error.message);
+            }
+          } else {
+            try {
+            
+              const response = await fetch("http://localhost:5000/api/eventos/eliminar-evento-calendario", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                  userId,
+                  eventoId
+                })
+              });
+
+              if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || "Error en la solicitud.");
+              }
+
+              const data = await response.json();
+
+              if (data.success) {
+                botonAgregar.textContent = "Agregar";
+                botonAgregar.classList.remove("agregado");
+              } else {
+                console.error("Error al eliminar evento:", data.message);
+                alert("Error al eliminar evento: " + data.message);
+              }
+            } catch (error) {
+              console.error("Error al eliminar evento:", error);
+              alert("Error al eliminar evento: " + error.message);
+            }
+          }
+        });
+
+        eventosContainer.appendChild(eventCard);
+      });
+    } else {
+      console.error("Error al cargar eventos:", data.message);
+    }
+  } catch (error) {
+    console.error("Error al obtener eventos:", error);
+  }
+}
+  
+    
+    document.addEventListener("click", function (event) {
+      if (event.target.classList.contains("ver-detalles")) {
+        const link = event.target;
+        const nombre = link.dataset.nombre;
+        const imagen = link.dataset.imagen;
+        const fecha = link.dataset.fecha;
+        const hora = link.dataset.hora;
+        const ubicacion = link.dataset.ubicacion;
+        const descripcion = link.dataset.descripcion;
+        const costo = link.dataset.costo;
+        const etiquetas = JSON.parse(link.dataset.etiquetas || "[]");
+  
+        mostrarDetallesEvento(nombre, imagen, fecha, hora, ubicacion, descripcion, costo, etiquetas);
+      }
+    });
+  
+    function mostrarDetallesEvento(nombre, imagen, fecha, hora, ubicacion, descripcion, costo, etiquetas) {
+      console.log("Evento seleccionado:", nombre, imagen, fecha, hora, ubicacion, descripcion, costo, etiquetas);
+  
+      
+      document.getElementById("modal-imagen").src = imagen || "";
+      document.getElementById("modal-nombre").textContent = nombre || "Sin nombre";
+      document.getElementById("modal-fecha").textContent = fecha ? `${fecha}` : "Fecha no disponible";
+      document.getElementById("modal-hora").textContent = hora ? `${hora}` : "Hora no disponible";
+      document.getElementById("modal-ubicacion").textContent = ubicacion || "Ubicación no disponible";
+      document.getElementById("modal-descripcion").textContent = descripcion || "Sin descripción";
+      document.getElementById("modal-costo").textContent = costo || "Sin costo";
+
+  
+      const etiquetasContainer = document.getElementById("modal-etiquetas");
+      etiquetasContainer.innerHTML = etiquetas.map(etiqueta => `<span class="etiqueta">${etiqueta}</span>`).join("");
+    }
+
+    window.addEventListener("message", (event) => {
+  if (event.data.action === "cerrarModal") {
+    const modalModificar = bootstrap.Modal.getInstance(document.getElementById("modificarEventoModal"));
+    if (modalModificar) {
+      modalModificar.hide();
+    }
+  }
+});
+
+  </script>
+
+</body>
+</html>

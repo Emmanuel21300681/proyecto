@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Comunidades</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: white;
+        }
+
+        .navbar {
+            background-color: #0e9ed6;
+            padding: 15px;
+            text-align: center;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .container {
+            padding: 20px;
+        }
+
+        .community {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .community-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .community img {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            margin-right: 10px;
+        }
+
+        .btn {
+            padding: 5px 15px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 14px;
+            color: white;
+            transition: 0.3s;
+        }
+
+        .btn-danger { background-color: #db4437; }
+        .btn-primary { background-color: #1e90ff; }
+    </style>
+</head>
+<body>
+    <div class="navbar">Comunidades</div>
+    <div class="container" id="communitiesContainer">
+        <p>Cargando comunidades...</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const email = localStorage.getItem('email');
+
+            fetch('http://localhost:5000/api/perfil/comunidades', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                const container = document.getElementById('communitiesContainer');
+                container.innerHTML = '';
+
+                if (data.success && data.comunidades.length > 0) {
+                    data.comunidades.forEach(comunidad => {
+                        const communityElement = document.createElement('div');
+                        communityElement.classList.add('community');
+
+                        let buttonText = comunidad.esMiembro ? "Salir" : comunidad.privada ? "Mandar Solicitud" : "Unirse";
+                        let buttonClass = comunidad.esMiembro ? "btn-danger" : "btn-primary";
+
+                        communityElement.innerHTML = `
+                            <div class="community-info">
+                                <img src="${comunidad.fotoComunidad || 'img/comunidad.jpg'}" alt="Imagen de comunidad">
+                                <span>${comunidad.nombre}</span>
+                            </div>
+                            <button class="btn ${buttonClass}" onclick="toggleComunidad('${comunidad.id}', this, ${comunidad.privada})">
+                                ${buttonText}
+                            </button>
+                        `;
+
+                        container.appendChild(communityElement);
+                    });
+                } else {
+                    container.innerHTML = '<p>No perteneces a ninguna comunidad.</p>';
+                }
+            })
+            .catch(error => {
+                console.error('Error al obtener comunidades:', error);
+                document.getElementById('communitiesContainer').innerHTML = '<p>Error al cargar comunidades.</p>';
+            });
+        });
+
+        function toggleComunidad(id, btn, privada) {
+            let action;
+            if (btn.textContent === "Salir") {
+                action = "salir";
+            } else if (btn.textContent === "Unirse") {
+                action = "unirse";
+            } else {
+                action = "solicitar";
+            }
+
+            fetch(`http://localhost:5000/api/comunidad/${action}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    btn.textContent = action === "salir" ? (privada ? "Mandar Solicitud" : "Unirse") : "Salir";
+                    btn.classList.toggle("btn-danger");
+                    btn.classList.toggle("btn-primary");
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>

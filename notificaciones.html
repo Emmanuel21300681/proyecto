@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notificaciones</title>
+  <script src="https://cdn.socket.io/4.5.1/socket.io.min.js"></script>
+  <style>
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+body { 
+    font-family: "Arial", sans-serif; 
+    background-color: #f5f5f5; 
+    margin: 0; 
+    min-height: 100vh; 
+}
+
+.header { 
+    background-color: #f5deb3; 
+    text-align: center; 
+    padding: 20px; 
+    font-size: 32px; 
+    font-weight: bold; 
+    position: sticky; 
+    top: 0; 
+    width: 100%; 
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2); 
+}
+
+.content { 
+    padding: 20px; 
+    text-align: center; 
+}
+
+
+.notification-container { 
+    width: 95%;  
+    max-width: 100%; 
+    margin: 20px auto; 
+    background: white; 
+    border-radius: 10px; 
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1); 
+    padding: 15px; 
+    text-align: left; 
+}
+
+
+.notification { 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    padding: 15px; 
+    border-bottom: 1px solid #ddd; 
+    width: 100%; 
+    box-sizing: border-box; 
+}
+
+.notification:last-child { 
+    border-bottom: none; 
+}
+
+.profile-img { 
+    width: 50px; 
+    height: 50px; 
+    border-radius: 50%; 
+    margin-right: 10px; 
+    background-size: cover; 
+    background-position: center; 
+}
+
+.notif-text { 
+    flex-grow: 1; 
+    width: 100%; 
+}
+
+.notif-text p { 
+    margin: 0; 
+    font-size: 16px; 
+    color: #333; 
+}
+
+.notif-time { 
+    font-size: 12px; 
+    color: #777; 
+}
+
+.notif-new { 
+    background-color: #fff7e6; 
+    border-left: 5px solid #ffcc00; 
+}
+
+.btn { 
+    padding: 5px 10px; 
+    border: none; 
+    border-radius: 5px; 
+    cursor: pointer; 
+    font-size: 14px; 
+    transition: 0.3s; 
+}
+
+.btn-primary { 
+    background-color: #1e90ff; 
+    color: white; 
+}
+
+.btn-warning { 
+    background-color: orange; 
+    color: white; 
+}
+
+.btn-danger { 
+    background-color: #db4437; 
+    color: white; 
+}
+
+
+.notif-wrapper { 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    width: 100%; 
+    padding: 10px 0; 
+}
+
+.delete-btn { 
+    width: 24px; 
+    height: 24px; 
+    cursor: pointer; 
+    margin-left: 15px; 
+    transition: transform 0.2s ease-in-out; 
+}
+
+.delete-btn:hover { 
+    transform: scale(1.2); 
+}
+
+
+.filter-container { 
+    display: flex; 
+    justify-content: flex-end; 
+    align-items: center; 
+    margin-bottom: 30px; 
+    padding: 10px; 
+    background-color: #f8f9fa; 
+    border-radius: 10px; 
+    box-shadow: none; 
+    border: none; 
+    width: 100%;
+}
+
+.filter-container select { 
+    padding: 10px 15px; 
+    font-size: 16px; 
+    border-radius: 8px; 
+    border: 1px solid #ccc; 
+    background-color: white; 
+    cursor: pointer; 
+    transition: all 0.3s ease-in-out; 
+    outline: none; 
+    box-shadow: none; 
+}
+
+.filter-container select:hover { 
+    border-color: #1e90ff; 
+}
+
+.filter-container select:focus { 
+    border-color: #1e90ff; 
+    box-shadow: 0px 0px 5px rgba(30, 144, 255, 0.5); 
+}
+
+@media (max-width: 600px) { 
+    .filter-container { 
+        justify-content: center; 
+    }
+}
+
+
+
+
+
+  </style>
+</head>
+<body>
+
+  
+
+  <div class="header">Notificaciones</div>
+  <hr style="border: none; height: 20px;">
+  <div class="filter-container">
+
+    <select id="filterType" onchange="aplicarFiltro()">
+      <option value="fecha">Fecha</option>
+      <option value="modulo">Módulo</option>
+    </select>
+  
+    <select id="moduleFilter" style="display: none;">
+      <option value="Todos">Todos</option>
+      <option value="Seguidores">Seguidores</option>
+      <option value="Chats">Chats</option>
+      <option value="Grupos">Grupos</option>
+      <option value="Lives">Lives</option>
+      <option value="Eventos">Eventos</option>
+      <option value="Reportes">Reportes</option>
+    </select>
+  </div>
+    <div class="notification-container" id="notificacionesContainer">
+      <p>Cargando notificaciones...</p>
+    </div>
+  </div>
+
+  
+  
+   
+  </div>
+  
+  
+
+  <script>
+    const email = localStorage.getItem('email');
+    const socket = io('http://localhost:5000');
+
+    let todasLasNotificaciones = []; 
+
+function obtenerNotificaciones() {
+  fetch('http://localhost:5000/api/notificaciones/obtener', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      todasLasNotificaciones = data.notificaciones; 
+      aplicarFiltro();
+    }
+  })
+  .catch(error => console.error('Error al obtener notificaciones:', error));
+}
+
+function aplicarFiltro() {
+  const filtro = document.getElementById('filterType').value;
+  const moduleFilter = document.getElementById('moduleFilter');
+
+  if (filtro === "fecha") {
+    moduleFilter.style.display = "none";
+    mostrarNotificacionesAgrupadasPorFecha();
+  } else if (filtro === "modulo") {
+    moduleFilter.style.display = "inline-block"; 
+    mostrarNotificacionesPorModulo(moduleFilter.value); 
+  }
+}
+
+document.getElementById('filterType').addEventListener('change', aplicarFiltro);
+
+document.getElementById('moduleFilter').addEventListener('change', function () {
+  mostrarNotificacionesPorModulo(this.value);
+});
+
+
+
+function mostrarNotificacionesAgrupadasPorFecha() {
+  const container = document.getElementById('notificacionesContainer');
+  container.innerHTML = '';
+
+  const notificacionesPorFecha = {};
+
+  todasLasNotificaciones.forEach(notif => {
+    const fecha = new Date(notif.fecha);
+    const mesAnio = fecha.toLocaleString('es-ES', { month: 'long', year: 'numeric' });
+
+    if (!notificacionesPorFecha[mesAnio]) {
+      notificacionesPorFecha[mesAnio] = [];
+    }
+    notificacionesPorFecha[mesAnio].push(notif);
+  });
+
+  Object.keys(notificacionesPorFecha).forEach(mesAnio => {
+    
+    const header = document.createElement('h3');
+    header.textContent = mesAnio;
+    header.style.textAlign = "left";
+    header.style.marginTop = "10px";
+    header.style.borderBottom = "2px solid #ccc";
+    header.style.paddingBottom = "5px";
+    container.appendChild(header);
+
+    
+    notificacionesPorFecha[mesAnio].forEach(notif => {
+      container.appendChild(crearNotificacionElemento(notif));
+    });
+  });
+}
+
+
+function mostrarNotificacionesPorModulo(modulo) {
+  const container = document.getElementById('notificacionesContainer');
+  container.innerHTML = '';
+
+  
+  const moduloMap = {
+    "Seguidores": "nuevo_seguidor",
+    "Chats": "chat",
+    "Grupos": "grupo",
+    "Lives": "live",
+    "Eventos": "evento",
+    "Reportes": "reporte"
+  };
+
+  
+  const moduloFiltrado = moduloMap[modulo] || modulo;
+
+  
+  const notificacionesFiltradas = todasLasNotificaciones.filter(notif => 
+    modulo === "Todos" || notif.tipo === moduloFiltrado
+  );
+
+  if (notificacionesFiltradas.length === 0) {
+    container.innerHTML = '<p>No hay notificaciones en este módulo.</p>';
+    return;
+  }
+
+  
+  if (modulo !== "") {
+    const moduleHeader = document.createElement('h3');
+    moduleHeader.textContent = modulo;
+    moduleHeader.style.textAlign = "left";
+    moduleHeader.style.marginTop = "10px";
+    moduleHeader.style.borderBottom = "2px solid #ccc";
+    moduleHeader.style.paddingBottom = "5px";
+    moduleHeader.style.fontSize = "20px"; 
+    moduleHeader.style.color = "#333"; 
+    container.appendChild(moduleHeader);
+  }
+
+  
+  notificacionesFiltradas.forEach(notif => {
+    container.appendChild(crearNotificacionElemento(notif));
+  });
+}
+
+
+
+
+function crearNotificacionElemento(notif) {
+  const notifWrapper = document.createElement('div');
+  notifWrapper.classList.add('notif-wrapper');
+
+  const notifElement = document.createElement('div');
+  notifElement.classList.add('notification');
+  if (!notif.leida) notifElement.classList.add('notif-new');
+
+  const fotoPerfil = notif.usuarioOrigen?.fotoPerfil || 'img/perfil.jpg';
+  const username = notif.usuarioOrigen?.username || 'Usuario';
+  const mensaje = notif.mensaje.replace(username, "").trim(); 
+
+  notifElement.innerHTML = `
+    <div class="profile-img" style="background-image: url('${fotoPerfil}')"></div>
+    <div class="notif-text">
+      <p><strong>${username}</strong> ${mensaje}</p>
+      <span class="notif-time">${new Date(notif.fecha).toLocaleString()}</span>
+    </div>
+  `;
+
+  
+  notifElement.onclick = () => marcarComoLeida(notif._id, notifElement);
+
+  
+  const buttonContainer = document.createElement('div');
+  if (notif.usuarioOrigen?.email) {
+    definirBoton(notif.usuarioOrigen, buttonContainer);
+  }
+
+  
+  const deleteButton = document.createElement('img');
+  deleteButton.src = 'img/eliminar.png';
+  deleteButton.alt = 'Eliminar notificación';
+  deleteButton.classList.add('delete-btn');
+  deleteButton.onclick = (event) => {
+    event.stopPropagation();
+    eliminarNotificacion(notif._id, notifWrapper);
+  };
+
+  notifWrapper.appendChild(notifElement);
+  notifWrapper.appendChild(buttonContainer);
+  notifWrapper.appendChild(deleteButton);
+
+  return notifWrapper;
+}
+
+
+
+
+   
+
+    async function definirBoton(usuario, buttonContainer) {
+      try {
+        const response = await fetch('http://localhost:5000/api/perfil/no-seguidos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, amigoEmail: usuario.email })
+        });
+
+        const data = await response.json();
+        buttonContainer.innerHTML = '';
+
+        const button = document.createElement('button');
+        button.classList.add('btn');
+
+        if (data.sonAmigos) {
+          button.textContent = "Dejar de seguir";
+          button.classList.add("btn-danger");
+          button.onclick = () => modificarAmistad(usuario.email, buttonContainer);
+        } else if (data.solicitudPendiente) {
+          button.textContent = "Cancelar Solicitud";
+          button.classList.add("btn-warning");
+          button.onclick = () => cancelarSolicitud(usuario.email, buttonContainer);
+        } else {
+          button.textContent = data.cuentaPrivada ? "Mandar Solicitud" : "Seguir";
+          button.classList.add("btn-primary");
+          button.onclick = () => mandarSolicitud(usuario.email, buttonContainer);
+        }
+
+        buttonContainer.appendChild(button);
+      } catch (error) {
+        console.error("Error al obtener estado de seguimiento:", error);
+      }
+    }
+
+    function modificarAmistad(amigoEmail, buttonContainer) {
+      fetch('http://localhost:5000/api/perfil/eliminar-amigo-unilateral', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, amigoEmail })
+      })
+      .then(response => response.json())
+      .then(() => definirBoton({ email: amigoEmail }, buttonContainer))
+      .catch(error => console.error("Error al modificar amistad:", error));
+    }
+
+    function mandarSolicitud(amigoEmail, buttonContainer) {
+  fetch('http://localhost:5000/api/perfil/no-seguidos', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, amigoEmail })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (!data.success) {
+      console.error("Error al obtener estado de seguimiento:", data.message);
+      return;
+    }
+
+    
+    if (data.cuentaPrivada) {
+      fetch('http://localhost:5000/api/perfil/mandar-solicitud', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, amigoEmail })
+      })
+      .then(response => response.json())
+      .then(() => definirBoton({ email: amigoEmail }, buttonContainer))
+      .catch(error => console.error("Error al enviar solicitud:", error));
+
+    } else {
+      
+      seguirAmigo(amigoEmail, buttonContainer);
+    }
+  })
+  .catch(error => console.error("Error al verificar cuenta:", error));
+}
+
+function seguirAmigo(amigoEmail, buttonContainer) {
+  fetch('http://localhost:5000/api/perfil/agregar-amigo', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, amigoEmail })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      console.log(" Amigo agregado correctamente:", data.message);
+      definirBoton({ email: amigoEmail }, buttonContainer);
+    } else {
+      console.error(" Error al agregar amigo:", data.message);
+    }
+  })
+  .catch(error => console.error(" Error al seguir usuario:", error));
+}
+
+
+    function cancelarSolicitud(amigoEmail, buttonContainer) {
+      fetch('http://localhost:5000/api/perfil/cancelar-solicitud', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, amigoEmail })
+      })
+      .then(response => response.json())
+      .then(() => definirBoton({ email: amigoEmail }, buttonContainer))
+      .catch(error => console.error("Error al cancelar solicitud:", error));
+    }
+
+    function marcarComoLeida(notificacionId, notifElement) {
+  fetch('http://localhost:5000/api/notificaciones/marcar-leida', {  
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ notificacionId })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      console.log(` Notificación ${notificacionId} marcada como leída.`);
+      notifElement.classList.remove('notif-new');  
+    } else {
+      console.error(" Error al marcar notificación como leída:", data.message);
+    }
+  })
+  .catch(error => console.error("Error en la solicitud de marcado como leído:", error));
+}
+
+
+    function eliminarNotificacion(notificacionId, notifWrapper) {
+  if (!notificacionId) {
+    console.error("ERROR: notificacionId no está definido.");
+    return;
+  }
+
+  console.log("Enviando solicitud para eliminar notificación con ID:", notificacionId);
+
+  
+  fetch('http://localhost:5000/api/notificaciones/eliminar', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ notificacionId })  
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log("Respuesta de eliminación:", data);
+    if (data.success) {
+      console.log(" Notificación eliminada correctamente.");
+      notifWrapper.remove(); 
+    } else {
+      console.error("Error al eliminar notificación:", data.message);
+    }
+  })
+  .catch(error => console.error("Error en la solicitud de eliminación:", error));
+}
+
+
+
+
+    socket.on('nueva_notificacion', (notificacion) => {
+      alert(`Nueva notificación: ${notificacion.mensaje}`);
+      obtenerNotificaciones();
+    });
+
+    obtenerNotificaciones();
+  </script>
+</body>
+</html>

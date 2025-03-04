@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mis LIVES</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap");
+  
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+  
+    body {
+      font-family: "Poppins", sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background: linear-gradient(to bottom, #d3d3d3, #ffffff);
+      background-attachment: fixed;
+      background-size: cover;
+      background-position: center;
+    }
+  
+    .main-content {
+      margin-top: 280px;
+      margin-left: 160px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      width: calc(100% - 160px);
+      height: auto;
+    }
+  
+    .options-bar {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: space-evenly;
+      position: fixed;
+      top: 0;
+      left: 0;
+      background: rgba(255, 255, 255, 0.9);
+      width: 170px;
+      height: 100%;
+      box-shadow: 2px 0px 5px rgba(0, 0, 0, 0.1);
+      padding: 20px 10px;
+      z-index: 1000;
+    }
+  
+    .option {
+      display: flex;
+      align-items: center;
+    }
+  
+    .options-bar img {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+      margin-right: 10px;
+    }
+  
+    .options-bar img:hover {
+      transform: scale(1.1);
+    }
+  
+    .option-text {
+      font-size: 14px;
+      font-weight: 400;
+      color: #333;
+    }
+  
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: fixed;
+      top: 0;
+      left: 170px;
+      background: #db4437;
+      color: white;
+      width: calc(100% - 170px);
+      height: 80px;
+      padding: 0 20px;
+      font-size: 28px;
+      box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+      z-index: 1001;
+    }
+  
+    .header h1 {
+      font-size: 36px;
+      font-weight: 700;
+      margin: 0;
+    }
+  
+    .header img {
+      height: 50px;
+      cursor: pointer;
+    }
+  
+    .search-container {
+      position: absolute;
+      top: 20%;
+      left: 28%;
+      transform: translate(-30%, -50%);
+      padding: 10px;
+    }
+  
+    .search-container input {
+      width: 650px;
+      padding: 0 20px;
+      outline: none;
+      box-sizing: border-box;
+      height: 60px;
+      color: #000;
+      border-radius: 50px;
+      font-size: 20px;
+      border: 1px solid #D50000;
+      transition: none;
+    }
+  
+    .search-container ::placeholder {
+      color: grey;
+    }
+  
+    .search-container .btn {
+      position: absolute;
+      right: 0;
+      top: 10px;
+      width: 60px;
+      height: 60px;
+      background: #050000;
+      line-height: 60px;
+      border-radius: 50%;
+      text-align: center;
+      cursor: pointer;
+      transition: .5s;
+    }
+  
+    .search-container .btn i {
+      font-size: 25px;
+      color: white;
+      line-height: 0px;
+      transition: all .7s ease;
+    }
+  
+    .search-container:hover i {
+      transform: rotate(-360deg);
+    }
+  
+    .search-container .btn:hover {
+      background: #cc0000;
+    }
+  
+    .buttons-container {
+      position: absolute;
+      top: 105px;
+      right: 1%;
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 10px;
+    }
+  
+    .action-button {
+      padding: 15px 25px;
+      font-size: 16px;
+      color: white;
+      background-color: #db4437;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+  
+    .action-button:hover {
+      background-color: #b33c2c;
+    }
+  
+    .modal-backdrop {
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+  
+    .modal-content {
+      background: rgba(255, 255, 255, 0.9);
+    }
+  
+    a.action-button {
+      text-decoration: none;
+      color: white;
+      display: inline-block;
+      text-align: center;
+    }
+  
+    .centered-text {
+      position: absolute;
+      z-index: 50;
+      top: 220px;
+      left: 430px;
+      font-size: 30px;
+      color: #4682B4;
+      text-align: left;
+    }
+  
+    .main-content {
+      margin-left: -30px;
+    }
+  
+    
+    .live-card {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  margin: 20px;
+  padding: 20px;
+  width: 150%;
+  max-width: 5000px;
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  position: relative;
+}
+
+.live-card img {
+  width: 200px;
+  height: 200px;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+.live-card .info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.live-card h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.live-card p {
+  font-size: 16px;
+  color: #555;
+  margin-bottom: 10px;
+}
+
+.live-card .etiquetas {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  gap: 10px;
+}
+
+.live-card .etiqueta {
+  background-color: #969190;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.live-card .botones-container {
+  display: flex;
+  flex-direction: column; 
+  gap: 10px; 
+  margin-left: auto; 
+  align-items: flex-end; 
+}
+
+.live-card .boton-modificar,
+.live-card .boton-eliminar,
+.live-card .boton-unirse,
+.live-card .boton-ver-calendario,
+.live-card .boton-eliminar-programado {
+  padding: 10px 20px;
+  font-size: 14px;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  width: 150px; 
+  font-weight: bold;
+}
+
+.live-card .boton-modificar:hover,
+.live-card .boton-eliminar:hover,
+.live-card .boton-unirse:hover,
+.live-card .boton-ver-calendario:hover,
+.live-card .boton-eliminar-programado:hover {
+  opacity: 0.9;
+}
+
+.live-card .boton-eliminar {
+  background-color: #db4437;
+}
+
+.live-card .boton-modificar {
+  background-color: #ff9800;
+}
+
+.live-card .boton-eliminar-programado {
+  background-color: #dc3545;
+}
+
+.live-card .boton-unirse {
+  background-color: #4caf50;
+}
+
+.live-card .boton-ver-calendario {
+  background-color: #17a2b8;
+}
+
+.live-card .boton-modificar.disabled,
+.live-card .boton-eliminar.disabled {
+  background-color: #b0bec5;
+  cursor: not-allowed;
+}
+
+.live-card .ver-detalles {
+  color: #4682B4;
+  text-decoration: none;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.live-card .ver-detalles:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .live-card {
+    width: 100%;
+    max-width: 100%;
+    flex-direction: column; 
+    align-items: center;
+  }
+
+  .live-card .info {
+    padding-left: 0;
+    text-align: center;
+  }
+
+  .live-card .botones-container {
+    margin-left: 0; 
+    justify-content: center; 
+    flex-wrap: wrap; 
+  }
+}
+
+
+.boton-modificar {
+  background-color: #ff9800;
+}
+
+.boton-eliminar {
+  background-color: #db4437;
+}
+
+.boton-eliminar-programado {
+  background-color: #e74c3c;
+}
+
+.boton-unirse {
+  background-color: #4caf50;
+}
+
+.boton-ver-calendario {
+  background-color: #17a2b8;
+}
+
+
+.boton-modificar:hover {
+  background-color: #e68900;
+}
+
+.boton-eliminar:hover {
+  background-color: #c1351d;
+}
+
+.boton-eliminar-programado:hover {
+  background-color: #c0392b;
+}
+
+.boton-unirse:hover {
+  background-color: #3e8e41;
+}
+
+.boton-ver-calendario:hover {
+  background-color: #138496;
+}
+
+
+.boton-modificar:active,
+.boton-eliminar:active,
+.boton-eliminar-programado:active,
+.boton-unirse:active,
+.boton-ver-calendario:active {
+  transform: scale(0.95);
+}
+
+
+
+.modal-detalles .modal-content {
+  padding: 25px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.modal-detalles .modal-header {
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  color: white;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  padding: 15px;
+  text-align: center;
+}
+
+.modal-detalles .modal-body {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  text-align: left;
+  gap: 25px;
+}
+
+.modal-detalles .modal-imagen {
+  max-width: 250px;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+}
+
+.modal-detalles .modal-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.modal-detalles h2 {
+  font-size: 26px;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+}
+
+.modal-detalles p {
+  font-size: 17px;
+  color: #444;
+  line-height: 1.4;
+}
+
+.modal-detalles .etiquetas {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.modal-detalles .etiqueta {
+  background: linear-gradient(135deg, #ff5733, #c70039);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease;
+}
+
+.modal-detalles .etiqueta:hover {
+  transform: scale(1.1);
+}
+
+.modal-detalles .boton-cerrar {
+  padding: 12px 18px;
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+  background: #db4437;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.modal-detalles .boton-cerrar:hover {
+  background-color: #b33c2c;
+  transform: scale(1.05);
+}
+
+@media (max-width: 768px) {
+  .modal-detalles .modal-body {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .modal-detalles .modal-info {
+    text-align: center;
+    align-items: center;
+  }
+
+  .modal-detalles .modal-imagen {
+    max-width: 80%;
+  }
+}
+
+
+
+  </style>
+</head>
+<body>
+
+  <div class="buttons-container">
+    <button class="action-button" data-bs-toggle="modal" data-bs-target="#agregarLiveModal">Agregar LIVE</button>
+    <a href="misLives.html" class="action-button">Mis Lives</a>
+    <a href="pruebacale.html" class="action-button">Calendario</a>
+  </div>
+
+  <div class="options-bar">
+    <div class="option">
+      <img src="img/usuario.png" alt="Usuario">
+      <span class="option-text">Usuario</span>
+    </div>
+    <div class="option">
+      <img src="img/explorar.png" alt="Explorar">
+      <span class="option-text">Explorar</span>
+    </div>
+    <div class="option">
+      <img src="img/chats.png" alt="Chats">
+      <span class="option-text">Chats</span>
+    </div>
+    <div class="option">
+      <img src="img/grupo.png" alt="Grupo">
+      <span class="option-text">Grupo</span>
+    </div>
+    <div class="option">
+      <img src="img/foro.png" alt="Foro">
+      <span class="option-text">Foro</span>
+    </div>
+    <div class="option">
+      <img src="img/canal.png" alt="Canal">
+      <span class="option-text">Canal</span>
+    </div>
+    <div class="option">
+      <img src="img/evento.png" alt="Evento">
+      <span class="option-text">Evento</span>
+    </div>
+    <div class="option">
+      <img src="img/calendario.png" alt="Calendario">
+      <span class="option-text">Calendario</span>
+    </div>
+    <div class="option">
+      <img src="img/live.png" alt="Live">
+      <span class="option-text">Live</span>
+    </div>
+  </div>
+
+  <div class="header">
+    <h1>Mis Lives</h1>
+    <img src="img/AthleticXs.png" alt="AthleticXs">
+  </div>
+
+  <div class="search-container">
+    <input type="text" placeholder="Buscar Live">
+    <div class="btn">
+      <i class="fas fa-search"></i>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <div id="mis-lives-container">
+      <h2>Mis Lives</h2>
+      <div class="lives-list"></div>
+    </div>
+
+    <div id="lives-programados-container">
+      <h2>Lives Programados</h2>
+      <div class="lives-list"></div>
+    </div>
+  </div>
+
+ 
+  <div class="modal fade" id="agregarLiveModal" tabindex="-1" aria-labelledby="agregarLiveModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="agregarLiveModalLabel">Agregar LIVE</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <iframe src="agregarLive.html" style="width: 100%; height: 500px; border: none;"></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade modal-detalles" id="detallesLiveModal" tabindex="-1" aria-labelledby="detallesLiveModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="detallesLiveModalLabel">Detalles del LIVE</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <img id="modal-imagen" class="modal-imagen" src="" alt="Imagen del LIVE">
+          <div class="modal-info">
+            <h2 id="modal-nombre"></h2>
+            <p><strong>Fecha:</strong> <span id="modal-fecha"></span></p>
+            <p><strong>Hora:</strong> <span id="modal-hora"></span></p>
+            <p><strong>Duración:</strong> <span id="modal-duracion"></span></p>
+            <p><strong>Descripción:</strong> <span id="modal-descripcion"></span></p>
+            <div class="etiquetas" id="modal-etiquetas"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="boton-cerrar" data-bs-dismiss="modal">Cerrar</button>
+        </div>
+      </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="modificarLiveModal" tabindex="-1" aria-labelledby="modificarLiveModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modificarLiveModalLabel">Modificar LIVE</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <iframe id="modificarLiveIframe" src="" style="width: 100%; height: 500px; border: none;"></iframe>
+      </div>
+    </div>
+  </div>
+</div>
+ 
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const userEmail = localStorage.getItem('email');
+      const userId = localStorage.getItem('userId');
+  
+      if (!userEmail || !userId) {
+        console.warn("Usuario no autenticado. Redirigiendo a registro...");
+        alert("Usuario no autenticado. Redirigiendo a registro.");
+        window.location.href = 'registro.html';
+      } else {
+        try {
+          console.log("Obteniendo datos para el usuario:", userEmail);
+          const response = await fetch(`http://localhost:5000/api/live/mis-lives?email=${userEmail}`);
+          const data = await response.json();
+  
+          if (data.success) {
+            const misLivesContainer = document.getElementById("mis-lives-container");
+            const livesProgramadosContainer = document.getElementById("lives-programados-container");
+  
+            misLivesContainer.querySelector(".lives-list").innerHTML = "";
+            livesProgramadosContainer.querySelector(".lives-list").innerHTML = "";
+  
+            const ahora = new Date();
+  
+          
+const misLivesFuturos = data.misLives.filter(live => new Date(live.fecha + 'T' + live.hora) > ahora);
+const misLivesEnCurso = data.misLives.filter(live => new Date(live.fecha + 'T' + live.hora) <= ahora);
+
+
+misLivesFuturos.forEach(live => {
+  const liveCard = document.createElement("div");
+  liveCard.className = "live-card";
+
+  liveCard.innerHTML = `
+    <img src="${live.imagen}" alt="${live.nombre}">
+    <div class="info">
+      <h2>${live.nombre}</h2>
+      <p><strong>Fecha: </strong>${live.fecha}</p>
+      <p><strong>Hora: </strong> ${live.hora}</p>
+      <p>${live.descripcion}</p>
+      <a href="#" class="ver-detalles" data-bs-toggle="modal" data-bs-target="#detallesLiveModal"
+         data-nombre="${live.nombre}" 
+         data-imagen="${live.imagen}" 
+         data-fecha="${live.fecha}" 
+         data-hora="${live.hora}" 
+          data-duracion='${JSON.stringify(live.duracion)}'
+         data-descripcion="${live.descripcion}"
+         data-etiquetas='${JSON.stringify(live.etiquetas || [])}'>
+         Ver más detalles
+      </a>
+    </div>
+    <div class="botones-container">
+      <button class="boton-modificar" data-live-id="${live._id}">Modificar</button>
+      <button class="boton-eliminar" data-live-id="${live._id}" ${live.idLiveCalendario ? `data-id-calendario="${live.idLiveCalendario}"` : ''}>Eliminar</button>
+      <button class="boton-ver-calendario" data-live-id="${live._id}">Calendario</button>
+    </div>
+  `;
+
+  misLivesContainer.querySelector(".lives-list").appendChild(liveCard);
+});
+
+
+misLivesEnCurso.forEach(live => {
+  const liveCard = document.createElement("div");
+  liveCard.className = "live-card";
+
+  liveCard.innerHTML = `
+    <img src="${live.imagen}" alt="${live.nombre}">
+    <div class="info">
+      <h2>${live.nombre}</h2>
+      <p><strong>Fecha: </strong>${live.fecha}</p>
+      <p><strong>Hora: </strong> ${live.hora}</p>
+      <p>${live.descripcion}</p>
+      <a href="#" class="ver-detalles" data-bs-toggle="modal" data-bs-target="#detallesLiveModal"
+         data-nombre="${live.nombre}" 
+         data-imagen="${live.imagen}" 
+         data-fecha="${live.fecha}" 
+         data-hora="${live.hora}" 
+          data-duracion='${JSON.stringify(live.duracion)}'
+         data-descripcion="${live.descripcion}"
+         data-etiquetas='${JSON.stringify(live.etiquetas || [])}'>
+         Ver más detalles
+      </a>
+    </div>
+    <div class="botones-container">
+      <button class="boton-eliminar" data-live-id="${live._id}" ${live.idLiveCalendario ? `data-id-calendario="${live.idLiveCalendario}"` : ''}>Eliminar</button>
+      <button class="boton-unirse" data-live-id="${live._id}" data-enlace="${live.enlace}">Unirse</button>
+    </div>
+  `;
+
+  misLivesContainer.querySelector(".lives-list").appendChild(liveCard);
+});
+
+
+const livesProgramadosFuturos = data.livesProgramados.filter(live => new Date(live.fecha + 'T' + live.hora) > ahora);
+const livesProgramadosEnCurso = data.livesProgramados.filter(live => new Date(live.fecha + 'T' + live.hora) <= ahora);
+
+
+livesProgramadosFuturos.forEach(live => {
+  const liveCard = document.createElement("div");
+  liveCard.className = "live-card";
+
+  liveCard.innerHTML = `
+    <img src="${live.imagen}" alt="${live.nombre}">
+    <div class="info">
+      <h2>${live.nombre}</h2>
+      <p><strong>Fecha: </strong>${live.fecha}</p>
+      <p><strong>Hora: </strong> ${live.hora}</p>
+      <p>${live.descripcion}</p>
+      <a href="#" class="ver-detalles" data-bs-toggle="modal" data-bs-target="#detallesLiveModal"
+         data-nombre="${live.nombre}" 
+         data-imagen="${live.imagen}" 
+         data-fecha="${live.fecha}" 
+         data-hora="${live.hora}" 
+          data-duracion='${JSON.stringify(live.duracion)}'
+         data-descripcion="${live.descripcion}"
+         data-etiquetas='${JSON.stringify(live.etiquetas || [])}'>
+         Ver más detalles
+      </a>
+    </div>
+    <div class="botones-container">
+      <button class="boton-ver-calendario" data-live-id="${live._id}">Calendario</button>
+      <button class="boton-eliminar-programado" data-live-id="${live._id}" ${live.agregarCalendario && live.idLiveCalendario ? `data-id-calendario="${live.idLiveCalendario}"` : ''}>Eliminar</button>
+    </div>
+  `;
+
+  livesProgramadosContainer.querySelector(".lives-list").appendChild(liveCard);
+});
+
+
+livesProgramadosEnCurso.forEach(live => {
+  const liveCard = document.createElement("div");
+  liveCard.className = "live-card";
+
+  liveCard.innerHTML = `
+    <img src="${live.imagen}" alt="${live.nombre}">
+    <div class="info">
+      <h2>${live.nombre}</h2>
+      <p><strong>Fecha: </strong>${live.fecha}</p>
+      <p><strong>Hora: </strong> ${live.hora}</p>
+      <p>${live.descripcion}</p>
+      <a href="#" class="ver-detalles" data-bs-toggle="modal" data-bs-target="#detallesLiveModal"
+         data-nombre="${live.nombre}" 
+         data-imagen="${live.imagen}" 
+         data-fecha="${live.fecha}" 
+         data-hora="${live.hora}" 
+          data-duracion='${JSON.stringify(live.duracion)}'
+         data-descripcion="${live.descripcion}"
+         data-etiquetas='${JSON.stringify(live.etiquetas || [])}'>
+         Ver más detalles
+      </a>
+    </div>
+    <div class="botones-container">
+      <button class="boton-eliminar-programado" data-live-id="${live._id}" ${live.agregarCalendario && live.idLiveCalendario ? `data-id-calendario="${live.idLiveCalendario}"` : ''}>Eliminar</button>
+      <button class="boton-unirse" data-live-id="${live._id}" data-enlace="${live.enlace}">Unirse</button>
+    </div>
+  `;
+
+  livesProgramadosContainer.querySelector(".lives-list").appendChild(liveCard);
+});
+
+document.querySelectorAll('.boton-modificar').forEach(boton => {
+  boton.addEventListener('click', async (event) => {
+    const liveId = event.target.getAttribute("data-live-id");
+
+    if (!liveId) {
+      console.error("No se encontró el ID del LIVE.");
+      return;
+    }
+
+
+    try {
+      const response = await fetch(`http://localhost:5000/api/live/obtener-live/${liveId}`);
+      const data = await response.json();
+
+      if (data.success) {
+        const live = data.live;
+
+
+        const modal = new bootstrap.Modal(document.getElementById('modificarLiveModal'));
+        const iframe = document.getElementById('modificarLiveIframe');
+
+        iframe.src = `modificarlive.html?liveId=${liveId}` +
+          `&nombre=${encodeURIComponent(live.nombre)}` +
+          `&descripcion=${encodeURIComponent(live.descripcion)}` +
+          `&fecha=${encodeURIComponent(live.fecha)}` +
+          `&hora=${encodeURIComponent(live.hora)}` +
+          `&etiquetas=${encodeURIComponent(live.etiquetas.join(','))}` +
+          `&imagen=${encodeURIComponent(live.imagen)}` +
+          `&enlace=${encodeURIComponent(live.enlace)}` +
+          `&duracionValue=${encodeURIComponent(live.duracion.value)}` + 
+          `&duracionUnit=${encodeURIComponent(live.duracion.unit)}`; 
+
+        modal.show();
+      } else {
+        console.error("Error al obtener los datos del LIVE:", data.message);
+      }
+    } catch (error) {
+      console.error("Error al obtener los datos del LIVE:", error);
+    }
+  });
+});
+
+  
+            
+            document.querySelectorAll('.boton-eliminar').forEach(boton => {
+              boton.addEventListener('click', async (event) => {
+                const liveId = event.target.getAttribute("data-live-id");
+                const idLiveCalendario = event.target.getAttribute("data-id-calendario");
+  
+                console.log("Intentando eliminar desde misLives:", { liveId, idLiveCalendario, userId });
+  
+                if (!liveId || !userId) {
+                  console.error("No se encontró el liveId o userId.");
+                  alert("Faltan datos importantes.");
+                  return;
+                }
+  
+                const confirmacion = confirm("¿Seguro que quieres eliminar este live de misLives?");
+                if (!confirmacion) return;
+  
+                try {
+                  
+                  if (idLiveCalendario && idLiveCalendario !== "null" && idLiveCalendario.trim() !== "") {
+                    const responseCalendario = await fetch("http://localhost:5000/api/live/eliminar-live-calendario", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ userId, liveId, idLiveCalendario })
+                    });
+  
+                    const dataCalendario = await responseCalendario.json();
+  
+                    if (!dataCalendario.success) {
+                      alert("Error al eliminar el live del calendario.");
+                      return;
+                    }
+                  }
+  
+                  
+                  const responseLive = await fetch("http://localhost:5000/api/live/eliminar-live", {
+                    method: "DELETE",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ userId, liveId })
+                  });
+  
+                  const dataLive = await responseLive.json();
+  
+                  if (dataLive.success) {
+                    alert("Live eliminado de misLives correctamente.");
+  
+                    
+                    const liveCard = event.target.closest('.live-card');
+                    if (liveCard) {
+                      liveCard.remove();
+                    }
+                  } else {
+                    alert("Error al eliminar live de misLives.");
+                  }
+                } catch (error) {
+                  console.error("Error al eliminar live de misLives:", error);
+                  alert("Error al eliminar live de misLives.");
+                }
+              });
+            });
+  
+            
+            document.querySelectorAll('.boton-eliminar-programado').forEach(boton => {
+              boton.addEventListener('click', async (event) => {
+                const liveId = event.target.getAttribute("data-live-id");
+                const idLiveCalendario = event.target.getAttribute("data-id-calendario");
+  
+                console.log("Intentando eliminar desde livesProgramados:", { liveId, idLiveCalendario, userId });
+  
+                if (!liveId || !userId) {
+                  console.error(" No se encontró el liveId o userId.");
+                  alert("Faltan datos importantes.");
+                  return;
+                }
+  
+                const confirmacion = confirm("¿Seguro que quieres eliminar este live de livesProgramados?");
+                if (!confirmacion) return;
+  
+                try {
+                  
+                  if (idLiveCalendario && idLiveCalendario !== "null" && idLiveCalendario.trim() !== "") {
+                    const responseCalendario = await fetch("http://localhost:5000/api/live/eliminar-live-calendario", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ userId, liveId, idLiveCalendario })
+                    });
+  
+                    const dataCalendario = await responseCalendario.json();
+  
+                    if (!dataCalendario.success) {
+                      alert("Error al eliminar el live del calendario.");
+                      return;
+                    }
+                  }
+  
+                  
+                  const responseLive = await fetch("http://localhost:5000/api/live/eliminar-live-programado", {
+                    method: "DELETE",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ userId, liveId })
+                  });
+  
+                  const dataLive = await responseLive.json();
+  
+                  if (dataLive.success) {
+                    alert("Live eliminado de livesProgramados correctamente.");
+  
+                    
+                    const liveCard = event.target.closest('.live-card');
+                    if (liveCard) {
+                      liveCard.remove();
+                    }
+                  } else {
+                    alert("Error al eliminar live de livesProgramados.");
+                  }
+                } catch (error) {
+                  console.error("Error al eliminar live de livesProgramados:", error);
+                  alert("Error al eliminar live de livesProgramados.");
+                }
+              });
+            });
+  
+            
+            document.querySelectorAll('.boton-unirse').forEach(boton => {
+              boton.addEventListener('click', (event) => {
+                const enlace = event.target.getAttribute("data-enlace");
+                if (enlace) {
+                  window.open(enlace, "_blank");
+                } else {
+                  alert("No se encontró el enlace del live.");
+                }
+              });
+            });
+  
+            
+            document.querySelectorAll('.boton-ver-calendario').forEach(boton => {
+              boton.addEventListener('click', () => {
+                window.location.href = "pruebacale.html";
+              });
+            });
+  
+            
+            document.querySelector('.action-button[data-bs-target="#agregarLiveModal"]').addEventListener('click', () => {
+              const modal = new bootstrap.Modal(document.getElementById('agregarLiveModal'));
+              modal.show();
+            });
+  
+          } else {
+            console.error("Error al cargar los lives:", data.message);
+          }
+        } catch (error) {
+          console.error("Error al obtener datos del usuario:", error);
+        }
+      }
+    });
+
+
+    document.addEventListener("click", function (event) {
+  if (event.target.classList.contains("ver-detalles")) {
+    const link = event.target;
+    const nombre = link.dataset.nombre;
+    const imagen = link.dataset.imagen;
+    const fecha = link.dataset.fecha;
+    const hora = link.dataset.hora;
+    const duracion = JSON.parse(link.dataset.duracion || "{}");
+    const descripcion = link.dataset.descripcion;
+    const etiquetas = JSON.parse(link.dataset.etiquetas || "[]");
+
+    mostrarDetallesLive(nombre, imagen, fecha, hora, duracion, descripcion, etiquetas);
+  }
+});
+
+
+function mostrarDetallesLive(nombre, imagen, fecha, hora, duracion, descripcion, etiquetas) {
+  document.getElementById("modal-imagen").src = imagen || "";
+  document.getElementById("modal-nombre").textContent = nombre || "Sin nombre";
+  document.getElementById("modal-fecha").textContent = fecha ? `${fecha}` : "Fecha no disponible";
+  document.getElementById("modal-hora").textContent = hora ? `${hora}` : "Hora no disponible";
+  document.getElementById("modal-duracion").textContent = duracion ? `${duracion.value} ${duracion.unit}` : "Duración no disponible";
+  document.getElementById("modal-descripcion").textContent = descripcion || "Sin descripción";
+
+  const etiquetasContainer = document.getElementById("modal-etiquetas");
+  etiquetasContainer.innerHTML = etiquetas.map(etiqueta => `<span class="etiqueta">${etiqueta}</span>`).join("");
+}
+
+  </script>
+  
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
