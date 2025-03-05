@@ -29,8 +29,8 @@ app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 app.use(bodyParser.json());
 
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('✅ Conectado a la base de datos MongoDB'))
-  .catch((err) => console.error('❌ Error al conectar a MongoDB:', err));
+  .then(() => console.log('Conectado a la base de datos MongoDB'))
+  .catch((err) => console.error('Error al conectar a MongoDB:', err));
 
 app.use('/api', authRoutes);
 
@@ -42,16 +42,16 @@ const io = new Server(server, {
 });
 
 io.on('connection', (socket) => {
-  console.log('🟢 Nuevo usuario conectado:', socket.id);
+  console.log('Nuevo usuario conectado:', socket.id);
 
 
   socket.on('join', (userId) => {
     socket.join(userId);
-    console.log(`🔵 Usuario ${userId} unido a su sala privada.`);
+    console.log(`Usuario ${userId} unido a su sala privada.`);
   });
 
   socket.on('disconnect', () => {
-    console.log('🔴 Usuario desconectado:', socket.id);
+    console.log('Usuario desconectado:', socket.id);
   });
 });
 
@@ -59,5 +59,5 @@ app.set('io', io);
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
-  console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
+  console.log(`Servidor corriendo en el puerto ${PORT}`);
 });

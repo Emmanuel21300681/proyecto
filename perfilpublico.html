@@ -691,7 +691,7 @@
       }
 
       function handleImageClick(id, imageSrc) {
-          console.log(`🖼️ Click en imagen - ID: ${id}, SRC: ${imageSrc}`);
+          console.log(`Click en imagen - ID: ${id}, SRC: ${imageSrc}`);
           currentIndex = imageArray.findIndex((img) => img.id === id);
           const iframe = document.getElementById('postIframe');
 
@@ -719,28 +719,50 @@
                   updateFollowButton();
               }
           } catch (error) {
-              console.error("❌ Error al verificar seguimiento:", error);
+              console.error("Error al verificar seguimiento:", error);
           }
       }
 
       async function agregarAmigo(emailToFollow) {
-          try {
-              const response = await fetch('http://localhost:5000/api/perfil/agregar-amigo', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ email: emailUsuarioAutenticado, amigoEmail: emailToFollow }),
-              });
+    try {
+        const response = await fetch('http://localhost:5000/api/perfil/agregar-amigo', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: emailUsuarioAutenticado, amigoEmail: emailToFollow }),
+        });
 
-              const data = await response.json();
-              if (data.success) {
-                  isFollowing = true;
-                  updateFollowButton();
-                  await cargarEstadisticas(emailToFollow);
-              }
-          } catch (error) {
-              console.error('Error en la solicitud de seguir:', error);
-          }
-      }
+        const data = await response.json();
+        if (data.success) {
+            isFollowing = true;
+            updateFollowButton();
+            await cargarEstadisticas(emailToFollow);
+
+            
+            await enviarNotificacionSeguidor(emailUsuarioAutenticado, emailToFollow);
+        }
+    } catch (error) {
+        console.error('Error en la solicitud de seguir:', error);
+    }
+}
+
+async function enviarNotificacionSeguidor(emailSeguidor, emailSeguido) {
+    try {
+        const response = await fetch('http://localhost:5000/api/notificaciones/nuevo-seguidor', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ emailSeguidor, emailSeguido }),
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            console.log('Notificación de nuevo seguidor enviada correctamente.');
+        } else {
+            console.error('Error al enviar notificación de nuevo seguidor:', data.message);
+        }
+    } catch (error) {
+        console.error('Error en la solicitud de notificación:', error);
+    }
+}
 
       async function eliminarAmigo(emailToFollow) {
           try {

@@ -5,6 +5,47 @@ const User = require('../models/User');
 
 
 
+router.post('/nuevo-seguidor', async (req, res) => {
+  const { emailSeguidor, emailSeguido } = req.body;
+
+  if (!emailSeguidor || !emailSeguido) {
+    return res.status(400).json({ success: false, message: 'Faltan datos.' });
+  }
+
+  try {
+    const seguidor = await User.findOne({ email: emailSeguidor });
+    const seguido = await User.findOne({ email: emailSeguido });
+
+    if (!seguidor || !seguido) {
+      return res.status(404).json({ success: false, message: 'Usuarios no encontrados.' });
+    }
+
+    if (seguido.cuentaPrivada) {
+      return res.status(400).json({ success: false, message: 'Cuenta privada, no se genera notificación.' });
+    }
+
+    const nuevaNotificacion = new Notification({
+      tipo: 'nuevo_seguidor',
+      usuarioDestino: seguido._id,
+      usuarioOrigen: seguidor._id,
+      mensaje: `${seguidor.username} ha comenzado a seguirte.`
+    });
+
+    await nuevaNotificacion.save();
+
+
+    const io = req.app.get('io'); 
+    io.to(seguido._id.toString()).emit('nueva_notificacion', nuevaNotificacion);
+
+    res.status(200).json({ success: true, message: 'Notificación creada correctamente.' });
+
+  } catch (error) {
+    console.error('Error al crear notificación:', error);
+    res.status(500).json({ success: false, message: 'Error del servidor.' });
+  }
+});
+
+
 router.post('/obtener', async (req, res) => {
   const { email } = req.body;
 
