@@ -105,99 +105,49 @@
       cursor: pointer;
     }
   
-    .search-container {
-      position: absolute;
-      top: 20%;
-      left: 28%;
-      transform: translate(-30%, -50%);
-      padding: 10px;
-    }
-  
-    .search-container input {
-      width: 650px;
-      padding: 0 20px;
-      outline: none;
-      box-sizing: border-box;
-      height: 60px;
-      color: #000;
-      border-radius: 50px;
-      font-size: 20px;
-      border: 1px solid #D50000;
-      transition: none;
-    }
-  
-    .search-container ::placeholder {
-      color: grey;
-    }
-  
-    .search-container .btn {
-      position: absolute;
-      right: 0;
-      top: 10px;
-      width: 60px;
-      height: 60px;
-      background: #050000;
-      line-height: 60px;
-      border-radius: 50%;
-      text-align: center;
-      cursor: pointer;
-      transition: .5s;
-    }
-  
-    .search-container .btn i {
-      font-size: 25px;
-      color: white;
-      line-height: 0px;
-      transition: all .7s ease;
-    }
-  
-    .search-container:hover i {
-      transform: rotate(-360deg);
-    }
-  
-    .search-container .btn:hover {
-      background: #cc0000;
-    }
-  
     .buttons-container {
-      position: absolute;
-      top: 105px;
-      right: 1%;
-      display: flex;
-      justify-content: flex-start;
-      align-items: center;
-      gap: 10px;
-    }
-  
-    .action-button {
-      padding: 15px 25px;
-      font-size: 16px;
-      color: white;
-      background-color: #db4437;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-  
-    .action-button:hover {
-      background-color: #b33c2c;
-    }
-  
-    .modal-backdrop {
-      background-color: rgba(0, 0, 0, 0.5);
-    }
-  
-    .modal-content {
-      background: rgba(255, 255, 255, 0.9);
-    }
-  
-    a.action-button {
-      text-decoration: none;
-      color: white;
-      display: inline-block;
-      text-align: center;
-    }
+  position: absolute;
+  top: 150px;
+  right: 150px; 
+  display: flex;
+  justify-content: flex-end; 
+  align-items: center;
+  gap: 20px; 
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.8); 
+  border-radius: 20px; 
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(5px); 
+}
+
+.action-button {
+  padding: 15px 30px; 
+  font-size: 16px;
+  font-weight: 600; 
+  color: white;
+  background: linear-gradient(135deg, #db4437, #ff6f61); 
+  border: none;
+  border-radius: 10px; 
+  cursor: pointer;
+  transition: all 0.3s ease; 
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); 
+  text-transform: uppercase; 
+  letter-spacing: 1px; 
+  text-decoration: none; 
+  display: inline-block; 
+  text-align: center; 
+}
+
+.action-button:hover {
+  background: linear-gradient(135deg, #ff6f61, #db4437); 
+  transform: translateY(-3px); 
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); 
+}
+
+.action-button:active {
+  transform: translateY(0); 
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); 
+}
   
     .centered-text {
       position: absolute;
@@ -537,7 +487,7 @@
 
   <div class="buttons-container">
     <button class="action-button" data-bs-toggle="modal" data-bs-target="#agregarLiveModal">Agregar LIVE</button>
-    <a href="misLives.html" class="action-button">Mis Lives</a>
+    <a href="lives.html" class="action-button">Lives</a>
     <a href="pruebacale.html" class="action-button">Calendario</a>
   </div>
 
@@ -585,12 +535,7 @@
     <img src="img/AthleticXs.png" alt="AthleticXs">
   </div>
 
-  <div class="search-container">
-    <input type="text" placeholder="Buscar Live">
-    <div class="btn">
-      <i class="fas fa-search"></i>
-    </div>
-  </div>
+  
 
   <div class="main-content">
     <div id="mis-lives-container">
@@ -1047,6 +992,18 @@ function mostrarDetallesLive(nombre, imagen, fecha, hora, duracion, descripcion,
   const etiquetasContainer = document.getElementById("modal-etiquetas");
   etiquetasContainer.innerHTML = etiquetas.map(etiqueta => `<span class="etiqueta">${etiqueta}</span>`).join("");
 }
+
+
+window.addEventListener("message", function (event) {
+  if (event.data.action === "cerrarModalLive") {
+
+    const modal = bootstrap.Modal.getInstance(document.getElementById("agregarLiveModal"));
+    if (modal) {
+      modal.hide();
+    }
+  }
+});
+
 
   </script>
   

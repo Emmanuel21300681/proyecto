@@ -162,27 +162,46 @@ body {
 
 .buttons-container {
   position: absolute;
-  top: 105px;
-  right: 1%;
+  top: 120px;
+  right: 50px; 
   display: flex;
-  justify-content: flex-start;
+  justify-content: flex-end; 
   align-items: center;
-  gap: 10px;
+  gap: 20px; 
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.8); 
+  border-radius: 20px; 
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(5px); 
 }
 
 .action-button {
-  padding: 15px 25px;
+  padding: 15px 30px; 
   font-size: 16px;
+  font-weight: 600; 
   color: white;
-  background-color: #db4437;
+  background: linear-gradient(135deg, #db4437, #ff6f61); 
   border: none;
-  border-radius: 5px;
+  border-radius: 10px; 
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease; 
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); 
+  text-transform: uppercase; 
+  letter-spacing: 1px; 
+  text-decoration: none; 
+  display: inline-block; 
+  text-align: center; 
 }
 
 .action-button:hover {
-  background-color: #b33c2c;
+  background: linear-gradient(135deg, #ff6f61, #db4437); 
+  transform: translateY(-3px); 
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); 
+}
+
+.action-button:active {
+  transform: translateY(0); 
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); 
 }
 
 .modal-backdrop {
@@ -759,6 +778,28 @@ async function manejarAccionLive(live, userId, boton) {
         }, 500); 
       }
     });
+
+    document.addEventListener('DOMContentLoaded', () => {
+  const searchInput = document.querySelector('.search-container input');
+  const livesContainer = document.getElementById('lives-container');
+
+  searchInput.addEventListener('input', () => {
+    const searchText = searchInput.value.toLowerCase();
+    const lives = livesContainer.querySelectorAll('.live-card');
+
+    lives.forEach(live => {
+      const nombre = live.querySelector('h2').textContent.toLowerCase();
+      const fecha = live.querySelector('p:nth-of-type(1)').textContent.toLowerCase();
+      const etiquetas = Array.from(live.querySelectorAll('.etiqueta')).map(etiqueta => etiqueta.textContent.toLowerCase());
+
+      if (nombre.includes(searchText) || fecha.includes(searchText) || etiquetas.some(etiqueta => etiqueta.includes(searchText))) {
+        live.style.display = 'flex';
+      } else {
+        live.style.display = 'none';
+      }
+    });
+  });
+});
 
     
     document.addEventListener("click", function (event) {

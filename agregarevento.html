@@ -356,41 +356,18 @@
     const eventoData = await eventoResponse.json();
     if (eventoData.success) {
       alert("Evento creado con éxito.");
-      window.parent.postMessage({ action: "cerrarModal" }, "*");
-      window.parent.dispatchEvent(new Event("eventoModificado"));
 
-      if (agregarCalendario) {
-        const eventoCalendario = {
-          email: email,
-          eventName: nombre,
-          days: {},
-          time: hora,
-          location: ubicacion,
-          date: fecha,
-          duration: { value: duracionValue, unit: duracionUnit },
-          type: "EVENTO",
-        };
+      // Cerrar el modal
+      window.parent.postMessage({ action: "cerrarModalAgregarEvento" }, "*");
 
-        const calendarioResponse = await fetch("http://localhost:5000/api/evento/agregar-evento-calendario", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(eventoCalendario),
-        });
-
-        const calendarioData = await calendarioResponse.json();
-        if (calendarioData.success) {
-          // Éxito
-        } else {
-          // Error
-        }
-      }
-
-      location.reload();
+      // Recargar la página principal para mostrar el nuevo evento
+      window.parent.location.reload();
     } else {
       alert("Error al crear el evento: " + eventoData.message);
     }
   } catch (error) {
-    location.reload();
+    console.error("Error al crear el evento:", error);
+    alert("Error al crear el evento. Inténtalo de nuevo.");
   }
 });
   </script>

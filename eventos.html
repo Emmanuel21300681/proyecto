@@ -160,45 +160,50 @@
       background: #cc0000;
     }
 
-    .buttons-container {
-      position: absolute;
-      top: 105px;
-      right: 1%;
-      display: flex;
-      justify-content: flex-start;
-      align-items: center;
-      gap: 10px;
-    }
+    
+.buttons-container {
+  position: absolute;
+  top: 120px;
+  right: 50px; 
+  display: flex;
+  justify-content: flex-end; 
+  align-items: center;
+  gap: 20px; 
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.8); 
+  border-radius: 20px; 
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(5px); 
+}
 
-    .action-button {
-      padding: 15px 25px;
-      font-size: 16px;
-      color: white;
-      background-color: #db4437;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
+.action-button {
+  padding: 15px 30px; 
+  font-size: 16px;
+  font-weight: 600; 
+  color: white;
+  background: linear-gradient(135deg, #db4437, #ff6f61); 
+  border: none;
+  border-radius: 10px; 
+  cursor: pointer;
+  transition: all 0.3s ease; 
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); 
+  text-transform: uppercase; 
+  letter-spacing: 1px; 
+  text-decoration: none; 
+  display: inline-block; 
+  text-align: center; 
+}
 
-    .action-button:hover {
-      background-color: #b33c2c;
-    }
+.action-button:hover {
+  background: linear-gradient(135deg, #ff6f61, #db4437); 
+  transform: translateY(-3px); 
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); 
+}
 
-    .modal-backdrop {
-      background-color: rgba(0, 0, 0, 0.5);
-    }
-
-    .modal-content {
-      background: rgba(255, 255, 255, 0.9);
-    }
-
-    a.action-button {
-      text-decoration: none;
-      color: white;
-      display: inline-block;
-      text-align: center;
-    }
+.action-button:active {
+  transform: translateY(0); 
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); 
+}
 
     .centered-text {
       position: absolute;
@@ -800,6 +805,28 @@ async function cargarEventos(userId) {
     console.error("Error al obtener eventos:", error);
   }
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  const searchInput = document.querySelector('.search-container input');
+  const eventosContainer = document.getElementById('eventos-container');
+
+  searchInput.addEventListener('input', () => {
+    const searchText = searchInput.value.toLowerCase();
+    const eventos = eventosContainer.querySelectorAll('.event-card');
+
+    eventos.forEach(evento => {
+      const nombre = evento.querySelector('h2').textContent.toLowerCase();
+      const ubicacion = evento.querySelector('p:nth-of-type(2)').textContent.toLowerCase();
+      const etiquetas = Array.from(evento.querySelectorAll('.etiqueta')).map(etiqueta => etiqueta.textContent.toLowerCase());
+
+      if (nombre.includes(searchText) || ubicacion.includes(searchText) || etiquetas.some(etiqueta => etiqueta.includes(searchText))) {
+        evento.style.display = 'flex';
+      } else {
+        evento.style.display = 'none';
+      }
+    });
+  });
+});
   
     
     document.addEventListener("click", function (event) {
@@ -843,6 +870,21 @@ async function cargarEventos(userId) {
     }
   }
 });
+
+
+window.addEventListener("message", function (event) {
+  if (event.data.action === "cerrarModalAgregarEvento") {
+
+    const modal = bootstrap.Modal.getInstance(document.getElementById("agregarLiveModal"));
+    if (modal) {
+      modal.hide();
+    }
+  }
+});
+
+
+
+
 
   </script>
 
