@@ -536,6 +536,7 @@
 
 
 
+<!-- Modal para mostrar publicaciones -->
 <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg" style="background-color: transparent;">
     <div class="modal-content" style="background: transparent; border: none;">
@@ -556,259 +557,274 @@
   </div>
 </div>
 
+<!-- Script de Bootstrap -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
+<!-- Script principal -->
 <script>
   document.addEventListener('DOMContentLoaded', async () => {
-      console.log("📌 Script de perfil público cargado correctamente.");
-  
-      function getEmailFromURL() {
-          const params = new URLSearchParams(window.location.search);
-          return params.get('email');
-      }
-  
-      const email = getEmailFromURL();
-      const emailUsuarioAutenticado = localStorage.getItem('email'); 
+    console.log("📌 Script de perfil público cargado correctamente.");
 
-      if (!email) {
-          console.error("❌ No se encontró el email en la URL.");
-          return;
-      }
-  
-      let currentIndex = 0;
-      let imageArray = [];
-      let modalData = {};
-      let isFollowing = false;
-
-      // Evitar auto-seguimiento
-      if (email === emailUsuarioAutenticado) {
-          console.warn("⚠️ Un usuario no puede seguirse a sí mismo.");
-          document.getElementById('follow-button').style.display = 'none';
-      } else {
-          await verificarSeguimiento(emailUsuarioAutenticado, email);
-      }
-
-      async function cargarDatosPerfil() {
-          try {
-              const response = await fetch('http://localhost:5000/api/perfil/datos', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ email }),
-              });
-
-              const data = await response.json();
-              console.log("Datos recibidos del servidor:", data);  
-
-              if (data.success) {
-                  document.getElementById('profileImage').style.backgroundImage = `url('${data.fotoPerfil || 'img/perfil.jpg'}')`;
-
-                  document.getElementById('profileDetails').innerHTML = `
-                      <p><strong>${data.username}</strong> - ${data.tipoUsuario}</p>
-                      <p><strong>Biografía:</strong> ${data.biografia || 'N/A'}</p>
-                  `;
-
-                  await cargarEstadisticas(email);
-              } else {
-                  console.error(' Error al obtener los datos del perfil:', data.message);
-              }
-          } catch (error) {
-              console.error(' Error al cargar los datos del perfil:', error);
-          }
-      }
-
-      async function cargarEstadisticas(email) {
-          try {
-              const response = await fetch('http://localhost:5000/api/perfil/stats', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ email }),
-              });
-
-              const data = await response.json();
-              if (data.success) {
-                  document.querySelector('[data-bs-target="#amigosModal"] .stat-number').textContent = data.stats.seguidores ?? "0";
-                  document.querySelector('[data-bs-target="#seguidosModal"] .stat-number').textContent = data.stats.seguidos ?? "0";
-                  document.querySelector('[data-bs-target="#comunidadesModal"] .stat-number').textContent = data.stats.comunidades ?? "0";
-              } else {
-                  console.error("Error al obtener estadísticas:", data.message);
-              }
-          } catch (error) {
-              console.error("❌ Error al obtener estadísticas:", error);
-          }
-      }
-
-      async function cargarPublicaciones() {
-          try {
-              const response = await fetch('http://localhost:5000/api/perfil/obtener-publicaciones', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ email }),
-              });
-
-              const data = await response.json();
-              if (data.success) {
-                  imageArray = data.publicaciones.map(({ id, imagen, comentarios, usuario, fotoPerfil }) => ({
-                      id,
-                      src: imagen,
-                      comentarios,
-                      usuario,
-                      fotoPerfil
-                  }));
-
-                  modalData = {};
-                  const container = document.getElementById('photo-container');
-                  container.innerHTML = '';
-
-                  imageArray.forEach(({ id, src }) => {
-                      createImageElement(id, src);
-                  });
-
-                  console.log(` Se han cargado ${imageArray.length} imágenes.`);
-              } else {
-                  console.error(' Error al obtener las publicaciones:', data.message);
-              }
-          } catch (error) {
-              console.error(' Error al obtener las publicaciones:', error);
-          }
-      }
-
-      function createImageElement(id, src) {
-          const container = document.getElementById('photo-container');
-          const img = document.createElement('img');
-          img.src = src;
-          img.dataset.id = id;
-          img.style.width = '250px';
-          img.style.height = '250px';
-          img.style.objectFit = 'cover';
-          img.style.borderRadius = '5px';
-          img.style.cursor = 'pointer';
-
-          img.addEventListener('click', () => handleImageClick(id, src));
-          container.appendChild(img);
-          console.log(` Imagen agregada: ID=${id}, SRC=${src}`);
-      }
-
-      function handleImageClick(id, imageSrc) {
-          console.log(`Click en imagen - ID: ${id}, SRC: ${imageSrc}`);
-          currentIndex = imageArray.findIndex((img) => img.id === id);
-          const iframe = document.getElementById('postIframe');
-
-          if (!iframe) {
-              console.error(" Error: No se encontró el iframe del modal.");
-              return;
-          }
-
-          iframe.src = `post.html?id=${id}&image=${encodeURIComponent(imageSrc)}`;
-      }
-
-      async function verificarSeguimiento(myEmail, targetEmail) {
-          try {
-              const response = await fetch('http://localhost:5000/api/perfil/no-seguidos', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ email: myEmail, amigoEmail: targetEmail }),
-              });
-
-              const data = await response.json();
-              const followButton = document.getElementById('follow-button');
-
-              if (data.success) {
-                  isFollowing = data.sonAmigos;
-                  updateFollowButton();
-              }
-          } catch (error) {
-              console.error("Error al verificar seguimiento:", error);
-          }
-      }
-
-      async function agregarAmigo(emailToFollow) {
-    try {
-        const response = await fetch('http://localhost:5000/api/perfil/agregar-amigo', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: emailUsuarioAutenticado, amigoEmail: emailToFollow }),
-        });
-
-        const data = await response.json();
-        if (data.success) {
-            isFollowing = true;
-            updateFollowButton();
-            await cargarEstadisticas(emailToFollow);
-
-            
-            await enviarNotificacionSeguidor(emailUsuarioAutenticado, emailToFollow);
-        }
-    } catch (error) {
-        console.error('Error en la solicitud de seguir:', error);
+    // Obtener el email desde la URL
+    function getEmailFromURL() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('email');
     }
-}
 
-async function enviarNotificacionSeguidor(emailSeguidor, emailSeguido) {
-    try {
-        const response = await fetch('http://localhost:5000/api/notificaciones/nuevo-seguidor', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ emailSeguidor, emailSeguido }),
+    const email = getEmailFromURL();
+    const emailUsuarioAutenticado = localStorage.getItem('email');
+
+    if (!email) {
+      console.error("❌ No se encontró el email en la URL.");
+      return;
+    }
+
+    let currentIndex = 0;
+    let imageArray = [];
+    let modalData = {};
+    let isFollowing = false;
+
+    // Evitar auto-seguimiento
+    if (email === emailUsuarioAutenticado) {
+      console.warn("⚠️ Un usuario no puede seguirse a sí mismo.");
+      document.getElementById('follow-button').style.display = 'none';
+    } else {
+      await verificarSeguimiento(emailUsuarioAutenticado, email);
+    }
+
+    // Cargar datos del perfil
+    async function cargarDatosPerfil() {
+      try {
+        const response = await fetch('http://localhost:5000/api/perfil/datos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
         });
 
         const data = await response.json();
+        console.log("Datos recibidos del servidor:", data);
+
         if (data.success) {
-            console.log('Notificación de nuevo seguidor enviada correctamente.');
+          document.getElementById('profileImage').style.backgroundImage = `url('${data.fotoPerfil || 'img/perfil.jpg'}')`;
+
+          document.getElementById('profileDetails').innerHTML = `
+            <p><strong>${data.username}</strong> - ${data.tipoUsuario}</p>
+            <p><strong>Biografía:</strong> ${data.biografia || 'N/A'}</p>
+          `;
+
+          await cargarEstadisticas(email);
         } else {
-            console.error('Error al enviar notificación de nuevo seguidor:', data.message);
+          console.error('Error al obtener los datos del perfil:', data.message);
         }
-    } catch (error) {
-        console.error('Error en la solicitud de notificación:', error);
+      } catch (error) {
+        console.error('Error al cargar los datos del perfil:', error);
+      }
     }
-}
 
-      async function eliminarAmigo(emailToFollow) {
-          try {
-              const response = await fetch('http://localhost:5000/api/perfil/eliminar-amigo-unilateral', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ email: emailUsuarioAutenticado, amigoEmail: emailToFollow }),
-              });
+    // Cargar estadísticas del perfil
+    async function cargarEstadisticas(email) {
+      try {
+        const response = await fetch('http://localhost:5000/api/perfil/stats', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        });
 
-              const data = await response.json();
-              if (data.success) {
-                  isFollowing = false;
-                  updateFollowButton();
-                  await cargarEstadisticas(emailToFollow);
-              }
-          } catch (error) {
-              console.error('Error en la solicitud de eliminar amigo:', error);
-          }
+        const data = await response.json();
+        if (data.success) {
+          document.querySelector('[data-bs-target="#amigosModal"] .stat-number').textContent = data.stats.seguidores ?? "0";
+          document.querySelector('[data-bs-target="#seguidosModal"] .stat-number').textContent = data.stats.seguidos ?? "0";
+          document.querySelector('[data-bs-target="#comunidadesModal"] .stat-number').textContent = data.stats.comunidades ?? "0";
+        } else {
+          console.error("Error al obtener estadísticas:", data.message);
+        }
+      } catch (error) {
+        console.error("❌ Error al obtener estadísticas:", error);
+      }
+    }
+
+    // Cargar publicaciones del perfil
+    async function cargarPublicaciones() {
+      try {
+        const response = await fetch('http://localhost:5000/api/perfil/obtener-publicaciones', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          imageArray = data.publicaciones.map(({ id, imagen, comentarios, usuario, fotoPerfil }) => ({
+            id,
+            src: imagen,
+            comentarios,
+            usuario,
+            fotoPerfil
+          }));
+
+          modalData = {};
+          const container = document.getElementById('photo-container');
+          container.innerHTML = '';
+
+          imageArray.forEach(({ id, src }) => {
+            createImageElement(id, src);
+          });
+
+          console.log(`Se han cargado ${imageArray.length} imágenes.`);
+        } else {
+          console.error('Error al obtener las publicaciones:', data.message);
+        }
+      } catch (error) {
+        console.error('Error al obtener las publicaciones:', error);
+      }
+    }
+
+    // Crear elementos de imagen
+    function createImageElement(id, src) {
+      const container = document.getElementById('photo-container');
+      const img = document.createElement('img');
+      img.src = src;
+      img.dataset.id = id;
+      img.style.width = '250px';
+      img.style.height = '250px';
+      img.style.objectFit = 'cover';
+      img.style.borderRadius = '5px';
+      img.style.cursor = 'pointer';
+
+      img.addEventListener('click', () => handleImageClick(id, src));
+      container.appendChild(img);
+      console.log(`Imagen agregada: ID=${id}, SRC=${src}`);
+    }
+
+    // Manejar clic en la imagen
+    function handleImageClick(id, imageSrc) {
+      console.log(`Click en imagen - ID: ${id}, SRC: ${imageSrc}`);
+      currentIndex = imageArray.findIndex((img) => img.id === id);
+      const iframe = document.getElementById('postIframe');
+
+      if (!iframe) {
+        console.error("Error: No se encontró el iframe del modal.");
+        return;
       }
 
-      function updateFollowButton() {
-          const followButton = document.getElementById('follow-button');
-          if (isFollowing) {
-              followButton.textContent = 'Siguiendo';
-              followButton.classList.remove('btn-primary');
-              followButton.classList.add('btn-secondary');
-          } else {
-              followButton.textContent = 'Seguir';
-              followButton.classList.remove('btn-secondary');
-              followButton.classList.add('btn-primary');
-          }
+      iframe.src = `post.html?id=${id}&image=${encodeURIComponent(imageSrc)}`;
+
+      // Abrir el modal
+      const modal = new bootstrap.Modal(document.getElementById('imageModal'));
+      modal.show();
+    }
+
+    // Verificar si el usuario sigue al perfil
+    async function verificarSeguimiento(myEmail, targetEmail) {
+      try {
+        const response = await fetch('http://localhost:5000/api/perfil/no-seguidos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: myEmail, amigoEmail: targetEmail }),
+        });
+
+        const data = await response.json();
+        const followButton = document.getElementById('follow-button');
+
+        if (data.success) {
+          isFollowing = data.sonAmigos;
+          updateFollowButton();
+        }
+      } catch (error) {
+        console.error("Error al verificar seguimiento:", error);
       }
+    }
 
-      document.getElementById('follow-button').addEventListener('click', async () => {
-          if (isFollowing) {
-              await eliminarAmigo(email);
-          } else {
-              await agregarAmigo(email);
-          }
-      });
+    // Agregar amigo
+    async function agregarAmigo(emailToFollow) {
+      try {
+        const response = await fetch('http://localhost:5000/api/perfil/agregar-amigo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: emailUsuarioAutenticado, amigoEmail: emailToFollow }),
+        });
 
-      await cargarDatosPerfil();
-      await cargarPublicaciones();
+        const data = await response.json();
+        if (data.success) {
+          isFollowing = true;
+          updateFollowButton();
+          await cargarEstadisticas(emailToFollow);
+
+          await enviarNotificacionSeguidor(emailUsuarioAutenticado, emailToFollow);
+        }
+      } catch (error) {
+        console.error('Error en la solicitud de seguir:', error);
+      }
+    }
+
+    // Enviar notificación de nuevo seguidor
+    async function enviarNotificacionSeguidor(emailSeguidor, emailSeguido) {
+      try {
+        const response = await fetch('http://localhost:5000/api/notificaciones/nuevo-seguidor', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ emailSeguidor, emailSeguido }),
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          console.log('Notificación de nuevo seguidor enviada correctamente.');
+        } else {
+          console.error('Error al enviar notificación de nuevo seguidor:', data.message);
+        }
+      } catch (error) {
+        console.error('Error en la solicitud de notificación:', error);
+      }
+    }
+
+    // Eliminar amigo
+    async function eliminarAmigo(emailToFollow) {
+      try {
+        const response = await fetch('http://localhost:5000/api/perfil/eliminar-amigo-unilateral', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: emailUsuarioAutenticado, amigoEmail: emailToFollow }),
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          isFollowing = false;
+          updateFollowButton();
+          await cargarEstadisticas(emailToFollow);
+        }
+      } catch (error) {
+        console.error('Error en la solicitud de eliminar amigo:', error);
+      }
+    }
+
+    // Actualizar el botón de seguir
+    function updateFollowButton() {
+      const followButton = document.getElementById('follow-button');
+      if (isFollowing) {
+        followButton.textContent = 'Siguiendo';
+        followButton.classList.remove('btn-primary');
+        followButton.classList.add('btn-secondary');
+      } else {
+        followButton.textContent = 'Seguir';
+        followButton.classList.remove('btn-secondary');
+        followButton.classList.add('btn-primary');
+      }
+    }
+
+    // Evento de clic en el botón de seguir
+    document.getElementById('follow-button').addEventListener('click', async () => {
+      if (isFollowing) {
+        await eliminarAmigo(email);
+      } else {
+        await agregarAmigo(email);
+      }
+    });
+
+    // Cargar datos iniciales
+    await cargarDatosPerfil();
+    await cargarPublicaciones();
   });
 </script>
-
 
   
 
