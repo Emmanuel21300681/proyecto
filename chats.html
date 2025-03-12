@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chats - AthleticXs</title>
+    <script src="http://localhost:5000/socket.io/socket.io.js"></script>
+    <script src="http://localhost:5000/firebase.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; height: 100vh; display: flex; overflow: hidden; }
+        .sidebar { width: 350px; background: #ffffff; border-right: 1px solid #ddd; height: 100%; overflow-y: auto; box-shadow: 2px 0 10px rgba(0,0,0,0.1); }
+        .search-bar { padding: 20px; border-bottom: 1px solid #eee; position: sticky; top: 0; background: #fff; z-index: 10; }
+        .search-bar input { width: 100%; padding: 12px 15px; border: none; border-radius: 25px; background: #f5f5f5; font-size: 16px; outline: none; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); transition: all 0.3s; }
+        .search-bar input:focus { background: #fff; box-shadow: 0 0 5px rgba(0,123,255,0.5); }
+        .messages-title { padding: 15px 20px; font-size: 24px; color: #333; font-weight: 600; border-bottom: 1px solid #eee; }
+        .user-list { padding: 10px; }
+        .user-item { display: flex; align-items: center; padding: 15px; text-decoration: none; color: #333; border-radius: 10px; margin-bottom: 10px; transition: all 0.3s; background: #fff; cursor: pointer; }
+        .user-item:hover { background: #f0f0f0; transform: translateX(5px); }
+        .avatar { width: 50px; height: 50px; border-radius: 50%; margin-right: 15px; background-size: cover; background-position: center; border: 2px solid #ddd; }
+        .user-info { flex: 1; }
+        .user-info h3 { margin: 0; font-size: 18px; font-weight: 500; }
+        .user-info p { margin: 5px 0 0; font-size: 14px; color: #777; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .main-content { flex: 1; display: flex; justify-content: center; align-items: center; background: #e9ecef; transition: all 0.3s; }
+        .main-content img { max-width: 60%; max-height: 60%; object-fit: contain; opacity: 0.8; transition: opacity 0.3s; }
+        .main-content:hover img { opacity: 1; }
+        .loading { text-align: center; padding: 20px; color: #777; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Buscar usuario...">
+        </div>
+        <h2 class="messages-title">Mensajes</h2>
+        <div class="user-list" id="userList">
+            <div class="loading">Cargando...</div>
+        </div>
+    </div>
+    <div class="main-content">
+        <img src="img/AthleticXs.png" alt="AthleticXs">
+    </div>
+    <script>
+        const socket = io('http://localhost:5000');
+        let currentUserId = null;
+
+        socket.on('connect', () => {
+            console.log('✅ Socket.IO conectado exitosamente');
+        });
+
+        socket.on('connect_error', (error) => {
+            console.error('❌ Error conectando Socket.IO:', error);
+        });
+
+        console.log('Socket.IO Connected:', socket.connected);
+
+        // Inicializar Firebase
+        console.log('Firebase Config:', window.firebaseConfig);
+        firebase.initializeApp(window.firebaseConfig);
+        console.log('Firebase Initialized:', firebase.apps.length > 0);
+        const db = firebase.firestore();
+
+        // Obtener el ID del usuario actual
+        document.addEventListener('DOMContentLoaded', async () => {
+            const userEmail = localStorage.getItem('email');
+
+            if (!userEmail) {
+                console.warn("Usuario no autenticado. Redirigiendo a registro...");
+                alert("Usuario no autenticado. Redirigiendo a registro.");
+                window.location.href = 'registro.html';
+                return;
+            }
+
+            try {
+                const response = await fetch("http://localhost:5000/api/eventos/obtener-userId-por-email", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email: userEmail })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    currentUserId = data.userId;
+                    const username = data.username || "Usuario";
+                    const userFoto = data.fotoPerfil || "img/perfil.jpg";
+
+                    console.log("Usuario autenticado. ID:", currentUserId);
+                    console.log("Nombre:", username);
+                    console.log("Foto:", userFoto);
+
+                    localStorage.setItem('userId', currentUserId);
+                    localStorage.setItem('username', username);
+                    localStorage.setItem('fotoPerfil', userFoto);
+
+                    loadUsersAndChats(currentUserId);
+                } else {
+                    console.error("Error al obtener userId:", data.message);
+                    alert("Error al autenticar al usuario. Redirigiendo a registro.");
+                    window.location.href = 'registro.html';
+                }
+            } catch (error) {
+                console.error("Error al obtener userId:", error);
+                alert("Error del servidor. Redirigiendo a registro.");
+                window.location.href = 'registro.html';
+            }
+        });
+
+        async function loadUsersAndChats(currentUserId) {
+            const userList = document.getElementById('userList');
+            userList.innerHTML = '<div class="loading">Cargando...</div>';
+
+            try {
+                console.log(`Fetching chats for userId: ${currentUserId}`);
+                const chatsResponse = await fetch(`http://localhost:5000/api/chats/${currentUserId}`);
+                if (!chatsResponse.ok) {
+                    const errorText = await chatsResponse.text();
+                    throw new Error(`Error ${chatsResponse.status}: ${errorText}`);
+                }
+                const chats = await chatsResponse.json();
+                console.log('Chats recibidos:', chats);
+
+                console.log('Fetching all users...');
+                const usersResponse = await fetch('http://localhost:5000/api/users');
+                if (!usersResponse.ok) {
+                    const errorText = await usersResponse.text();
+                    throw new Error(`Error ${usersResponse.status}: ${errorText}`);
+                }
+                const allUsers = await usersResponse.json();
+                console.log('Usuarios recibidos:', allUsers);
+
+                // Mostrar solo los chats existentes al cargar
+                userList.innerHTML = '';
+                if (chats.length > 0) {
+                    chats.forEach(chat => {
+                        const userItem = createUserItem(chat.otherUser, chat.lastMessage, chat.chatId);
+                        userList.appendChild(userItem);
+                    });
+                } else {
+                    userList.innerHTML = '<div class="loading">No tienes chats aún. Busca un usuario para comenzar.</div>';
+                }
+
+                // Manejar la búsqueda de usuarios
+                document.getElementById('searchInput').addEventListener('input', function () {
+                    const filter = this.value.toLowerCase();
+                    userList.innerHTML = '';
+
+                    // Filtrar usuarios que no están en los chats y coinciden con la búsqueda
+                    const filteredUsers = allUsers.filter(user =>
+                        user.username.toLowerCase().includes(filter) &&
+                        user._id !== currentUserId &&
+                        !chats.some(chat => chat.otherUser.id === user._id)
+                    );
+
+                    // Mostrar usuarios filtrados
+                    filteredUsers.forEach(user => {
+                        const userItem = createUserItem(user, 'Inicia una conversación');
+                        userList.appendChild(userItem);
+                    });
+
+                    // Mostrar chats existentes que coincidan con la búsqueda
+                    chats.forEach(chat => {
+                        if (chat.otherUser.username.toLowerCase().includes(filter)) {
+                            const userItem = createUserItem(chat.otherUser, chat.lastMessage, chat.chatId);
+                            userList.appendChild(userItem);
+                        }
+                    });
+
+                    if (userList.children.length === 0) {
+                        userList.innerHTML = '<div class="loading">No se encontraron usuarios</div>';
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error cargando datos:', error);
+                userList.innerHTML = `<div class="loading">Error al cargar: ${error.message}</div>`;
+            }
+        }
+
+        function createUserItem(user, lastMessage, chatId = null) {
+            const a = document.createElement('a');
+            a.className = 'user-item';
+            a.href = '#';
+            a.innerHTML = `
+                <div class="avatar" style="background-image: url(${user.fotoPerfil || 'default-avatar.png'});"></div>
+                <div class="user-info">
+                    <h3>${user.username}</h3>
+                    <p>${lastMessage}</p>
+                </div>
+            `;
+
+            a.addEventListener('click', async (e) => {
+                e.preventDefault();
+                try {
+                    if (!chatId) {
+                        console.log(`Creando chat entre ${currentUserId} y ${user._id}`);
+                        const response = await fetch('http://localhost:5000/api/chats/create', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ userId: currentUserId, otherUserId: user._id })
+                        });
+                        if (!response.ok) {
+                            const errorText = await response.text();
+                            throw new Error(`Error creando chat: ${errorText}`);
+                        }
+                        const { chatId: newChatId } = await response.json();
+                        console.log(`Chat creado con ID: ${newChatId}`);
+                        window.location.href = `/chatusuario.html?chatId=${newChatId}`;
+                    } else {
+                        window.location.href = `/chatusuario.html?chatId=${chatId}`;
+                    }
+                } catch (error) {
+                    console.error('Error al crear/abrir chat:', error);
+                    alert('Error al crear el chat: ' + error.message);
+                }
+            });
+
+            return a;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Miembros del Grupo - AthleticXs</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f0f2f5; padding: 20px; }
+        .member-list { max-width: 600px; margin: 0 auto; }
+        .member-item { display: flex; align-items: center; padding: 10px; background: #fff; margin-bottom: 10px; border-radius: 5px; }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; margin-right: 10px; }
+        .hamburger-menu { margin-left: auto; cursor: pointer; }
+        .menu-dropdown { display: none; position: absolute; background: #fff; box-shadow: 0 0 10px rgba(0,0,0,0.1); border-radius: 5px; }
+        .menu-dropdown.active { display: block; }
+    </style>
+</head>
+<body>
+    <div class="member-list" id="memberList"></div>
+    <script>
+        const groupId = new URLSearchParams(window.location.search).get('groupId');
+        const currentUserId = localStorage.getItem('userId');
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const groupResponse = await fetch(`http://localhost:5000/api/groups/${currentUserId}`);
+            const groups = await groupResponse.json();
+            const group = groups.find(g => g._id === groupId);
+            const isCreator = group.creatorId === currentUserId;
+
+            const memberList = document.getElementById('memberList');
+            group.members.forEach(async memberId => {
+                const userResponse = await fetch(`http://localhost:5000/api/users/${memberId}`);
+                const user = await userResponse.json();
+
+                const memberItem = document.createElement('div');
+                memberItem.className = 'member-item';
+                memberItem.innerHTML = `
+                    <div class="avatar" style="background-image: url(${user.fotoPerfil || 'default-avatar.png'})"></div>
+                    <span>${user.username}</span>
+                    <div class="hamburger-menu" onclick="toggleMenu(this)">☰</div>
+                    <div class="menu-dropdown">
+                        ${isCreator ? `<a href="#" onclick="removeMember('${memberId}')">Expulsar</a>` : ''}
+                        <a href="#" onclick="viewProfile('${user.email}')">Ver perfil</a>
+                        <a href="#" onclick="startPrivateChat('${memberId}')">Chat privado</a>
+                        ${!isCreator ? `<a href="#" onclick="reportUser('${memberId}')">Reportar</a>` : ''}
+                    </div>
+                `;
+                memberList.appendChild(memberItem);
+            });
+        });
+
+        function toggleMenu(element) {
+            const menu = element.nextElementSibling;
+            menu.classList.toggle('active');
+        }
+
+        async function removeMember(userId) {
+            await fetch(`http://localhost:5000/api/groups/${groupId}/remove-member`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId })
+            });
+            location.reload();
+        }
+
+        function viewProfile(email) {
+            window.location.href = `/perfilpublico.html?email=${email}`;
+        }
+
+        async function startPrivateChat(userId) {
+            const response = await fetch('http://localhost:5000/api/chats/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: currentUserId, otherUserId: userId })
+            });
+            const { chatId } = await response.json();
+            window.location.href = `/chatusuario.html?chatId=${chatId}`;
+        }
+
+        function reportUser(userId) { alert('Función en desarrollo'); }
+    </script>
+</body>
+</html>

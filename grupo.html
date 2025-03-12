@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grupos - AthleticXs</title>
+    <script src="http://localhost:5000/socket.io/socket.io.js"></script>
+    <script src="http://localhost:5000/firebase.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            background: #f0f2f5; 
+            height: 100vh; 
+            display: flex; 
+            overflow: hidden; 
+        }
+        .sidebar { 
+            width: 350px; 
+            background: #ffffff; 
+            border-right: 1px solid #ddd; 
+            height: 100%; 
+            overflow-y: auto; 
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1); 
+        }
+        .search-bar { 
+            padding: 20px; 
+            border-bottom: 1px solid #eee; 
+            position: sticky; 
+            top: 0; 
+            background: #fff; 
+            z-index: 10; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+        .search-bar input { 
+            width: 70%; 
+            padding: 12px 15px; 
+            border: none; 
+            border-radius: 25px; 
+            background: #f5f5f5; 
+            font-size: 16px; 
+            outline: none; 
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); 
+            transition: all 0.3s; 
+        }
+        .search-bar input:focus { 
+            background: #fff; 
+            box-shadow: 0 0 5px rgba(0,123,255,0.5); 
+        }
+        .create-group-btn { 
+            padding: 10px 15px; 
+            background: #aa1616; 
+            color: white; 
+            border: none; 
+            border-radius: 25px; 
+            cursor: pointer; 
+            font-size: 14px; 
+            transition: background 0.3s; 
+        }
+        .create-group-btn:hover { background: #b41a1a; }
+        .messages-title { 
+            padding: 15px 20px; 
+            font-size: 24px; 
+            color: #333; 
+            font-weight: 600; 
+            border-bottom: 1px solid #eee; 
+        }
+        .group-list { padding: 10px; }
+        .group-item { 
+            display: flex; 
+            align-items: center; 
+            padding: 15px; 
+            text-decoration: none; 
+            color: #333; 
+            border-radius: 10px; 
+            margin-bottom: 10px; 
+            transition: all 0.3s; 
+            background: #fff; 
+            cursor: pointer; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
+        }
+        .group-item:hover { 
+            background: #f0f0f0; 
+            transform: translateX(5px); 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+        }
+        .avatar { 
+            width: 50px; 
+            height: 50px; 
+            border-radius: 50%; 
+            margin-right: 15px; 
+            background-size: cover; 
+            background-position: center; 
+            border: 2px solid #ddd; 
+        }
+        .group-info { flex: 1; }
+        .group-info h3 { margin: 0; font-size: 18px; font-weight: 500; }
+        .group-info p { 
+            margin: 5px 0 0; 
+            font-size: 14px; 
+            color: #777; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+        }
+        .main-content { 
+            flex: 1; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            background: #e9ecef; 
+            transition: all 0.3s; 
+        }
+        .main-content img { 
+            max-width: 60%; 
+            max-height: 60%; 
+            object-fit: contain; 
+            opacity: 0.8; 
+            transition: opacity 0.3s; 
+        }
+        .main-content:hover img { opacity: 1; }
+        .loading { text-align: center; padding: 20px; color: #777; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Buscar grupo...">
+            <button class="create-group-btn" onclick="window.location.href='creargrupo.html'">Crear grupo</button>
+        </div>
+        <h2 class="messages-title">Grupos</h2>
+        <div class="group-list" id="groupList">
+            <div class="loading">Cargando...</div>
+        </div>
+    </div>
+    <div class="main-content">
+        <img src="img/AthleticXs.png" alt="AthleticXs">
+    </div>
+    <script>
+        const socket = io('http://localhost:5000');
+        let currentUserId = null;
+
+        firebase.initializeApp(window.firebaseConfig);
+        const db = firebase.firestore();
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const userEmail = localStorage.getItem('email');
+            if (!userEmail) {
+                alert("Usuario no autenticado. Redirigiendo a registro.");
+                window.location.href = 'registro.html';
+                return;
+            }
+
+            const response = await fetch("http://localhost:5000/api/eventos/obtener-userId-por-email", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: userEmail })
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                currentUserId = data.userId;
+                localStorage.setItem('userId', currentUserId);
+                loadGroups(currentUserId);
+            } else {
+                alert("Error al autenticar al usuario.");
+                window.location.href = 'registro.html';
+            }
+        });
+
+        async function loadGroups(currentUserId) {
+            const groupList = document.getElementById('groupList');
+            try {
+                const groupsResponse = await fetch(`http://localhost:5000/api/groups/${currentUserId}`);
+                const groups = await groupsResponse.json();
+
+                groupList.innerHTML = '';
+                if (groups.length > 0) {
+                    groups.forEach(group => {
+                        const groupItem = createGroupItem(group);
+                        groupList.appendChild(groupItem);
+                    });
+                } else {
+                    groupList.innerHTML = '<div class="loading">No estás en ningún grupo aún.</div>';
+                }
+
+                document.getElementById('searchInput').addEventListener('input', async function() {
+                    const filter = this.value.toLowerCase();
+                    const allGroupsResponse = await fetch('http://localhost:5000/api/groups');
+                    const allGroups = await allGroupsResponse.json();
+
+                    groupList.innerHTML = '';
+                    const filteredGroups = allGroups.filter(group => 
+                        group.name.toLowerCase().includes(filter) && 
+                        !groups.some(g => g._id === group._id)
+                    );
+
+                    filteredGroups.forEach(group => {
+                        const groupItem = createGroupItem(group);
+                        groupList.appendChild(groupItem);
+                    });
+
+                    groups.forEach(group => {
+                        if (group.name.toLowerCase().includes(filter)) {
+                            const groupItem = createGroupItem(group);
+                            groupList.appendChild(groupItem);
+                        }
+                    });
+
+                    if (groupList.children.length === 0) {
+                        groupList.innerHTML = '<div class="loading">No se encontraron grupos</div>';
+                    }
+                });
+            } catch (error) {
+                console.error('Error cargando grupos:', error);
+                groupList.innerHTML = `<div class="loading">Error: ${error.message}</div>`;
+            }
+        }
+
+        function createGroupItem(group) {
+            const a = document.createElement('a');
+            a.className = 'group-item';
+            a.href = `/chatgrupo.html?groupId=${group._id}`;
+            a.innerHTML = `
+                <div class="avatar" style="background-image: url(${group.image || 'default-group.png'});"></div>
+                <div class="group-info">
+                    <h3>${group.name}</h3>
+                    <p>Último mensaje</p>
+                </div>
+            `;
+            return a;
+        }
+    </script>
+</body>
+</html>

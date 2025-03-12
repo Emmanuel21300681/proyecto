@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crear Grupo - AthleticXs</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap");
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+      font-family: "Poppins", sans-serif; 
+      background: linear-gradient(to bottom, #f0f0f0, #ffffff); 
+      min-height: 100vh; 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      padding: 20px; 
+    }
+    .form-container { 
+      background: #fff; 
+      padding: 30px; 
+      border-radius: 10px; 
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); 
+      width: 100%; 
+      max-width: 600px; 
+    }
+    .form-container h1 { 
+      font-size: 24px; 
+      font-weight: 600; 
+      margin-bottom: 20px; 
+      text-align: center; 
+      color: #333; 
+    }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { 
+      display: block; 
+      font-size: 14px; 
+      margin-bottom: 5px; 
+      color: #555; 
+    }
+    .form-group input, 
+    .form-group textarea { 
+      width: 100%; 
+      padding: 10px; 
+      font-size: 14px; 
+      border: 1px solid #ccc; 
+      border-radius: 5px; 
+      outline: none; 
+      transition: border-color 0.3s ease; 
+    }
+    .form-group input:focus, 
+    .form-group textarea:focus { border-color: #db4437; }
+    .form-group textarea { resize: none; height: 100px; }
+    .form-group .add-tag { 
+      display: flex; 
+      align-items: center; 
+      gap: 10px; 
+    }
+    .form-group .add-tag button { 
+      padding: 8px 12px; 
+      background-color: #db4437; 
+      color: #fff; 
+      border: none; 
+      border-radius: 5px; 
+      cursor: pointer; 
+      transition: background-color 0.3s ease; 
+    }
+    .form-group .add-tag button:hover { background-color: #b33c2c; }
+    .form-group .file-input-container { 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      margin: 0 auto; 
+      width: 100%; 
+      max-width: 300px; 
+      height: 150px; 
+      background-color: #e0e0e0; 
+      border: 2px dashed #ccc; 
+      border-radius: 5px; 
+      position: relative; 
+    }
+    .form-group .file-input-container label { 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      background-color: #db4437; 
+      color: white; 
+      border: none; 
+      border-radius: 50%; 
+      width: 50px; 
+      height: 50px; 
+      font-size: 24px; 
+      cursor: pointer; 
+      transition: background-color 0.3s ease; 
+    }
+    .form-group .file-input-container label:hover { background-color: #b33c2c; }
+    .form-group .file-input-container input { display: none; }
+    .button-container button { 
+      width: 100%; 
+      padding: 10px; 
+      font-size: 16px; 
+      color: #fff; 
+      border: none; 
+      border-radius: 5px; 
+      cursor: pointer; 
+      transition: background-color 0.3s ease; 
+      background-color: #db4437; 
+    }
+    .button-container button:hover { background-color: #b33c2c; }
+    .tags-container { 
+      display: flex; 
+      flex-wrap: wrap; 
+      gap: 10px; 
+      margin-top: 10px; 
+    }
+    .tag { 
+      background-color: #db4437; 
+      color: white; 
+      padding: 5px 10px; 
+      border-radius: 5px; 
+      display: flex; 
+      align-items: center; 
+      gap: 5px; 
+      font-size: 14px; 
+    }
+    .tag button { 
+      background: transparent; 
+      border: none; 
+      color: white; 
+      cursor: pointer; 
+      font-weight: bold; 
+      font-size: 12px; 
+      padding: 0; 
+      margin: 0; 
+    }
+    .tag button:hover { color: #ffcccc; }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <h1>Crear Grupo</h1>
+    <form id="group-form" enctype="multipart/form-data">
+      <div class="form-group">
+        <label for="group-name">Nombre del Grupo</label>
+        <input type="text" id="group-name" name="name" placeholder="Ingresa el nombre del grupo" required>
+      </div>
+
+      <div class="form-group">
+        <label for="group-description">Descripción</label>
+        <textarea id="group-description" name="description" placeholder="Ingresa la descripción del grupo"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Etiquetas</label>
+        <div class="add-tag">
+          <input type="text" id="group-tags" name="tags-input" placeholder="Añadir etiqueta">
+          <button type="button" id="add-tag">+</button>
+        </div>
+        <div class="tags-container" id="tags-container"></div>
+      </div>
+
+      <div class="form-group">
+        <label for="group-image">Imagen</label>
+        <div class="file-input-container" id="file-input-container">
+          <label for="group-image">+</label>
+          <input type="file" id="group-image" name="imagen" accept="image/*">
+        </div>
+      </div>
+
+      <div class="button-container">
+        <button type="submit">Crear Grupo</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    const groupImageInput = document.getElementById('group-image');
+    const fileInputContainer = document.getElementById('file-input-container');
+    const addTagButton = document.getElementById('add-tag');
+    const tagsContainer = document.getElementById('tags-container');
+    const groupForm = document.getElementById('group-form');
+    let etiquetas = [];
+
+    // Vista previa de la imagen
+    groupImageInput.addEventListener('change', function (event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          fileInputContainer.style.backgroundImage = `url('${e.target.result}')`;
+          fileInputContainer.style.backgroundSize = 'cover';
+          fileInputContainer.style.backgroundPosition = 'center';
+          fileInputContainer.style.border = 'none';
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Manejar la adición de etiquetas
+    addTagButton.addEventListener('click', () => {
+      const tagInput = document.getElementById('group-tags');
+      const tagValue = tagInput.value.trim();
+      if (tagValue && !etiquetas.includes(tagValue)) {
+        etiquetas.push(tagValue);
+        actualizarEtiquetas();
+        tagInput.value = '';
+      }
+    });
+
+    function actualizarEtiquetas() {
+      tagsContainer.innerHTML = '';
+      etiquetas.forEach(tag => {
+        const tagElement = document.createElement('div');
+        tagElement.classList.add('tag');
+        tagElement.innerHTML = `${tag} <button onclick="eliminarEtiqueta('${tag}')">x</button>`;
+        tagsContainer.appendChild(tagElement);
+      });
+    }
+
+    function eliminarEtiqueta(tag) {
+      etiquetas = etiquetas.filter(t => t !== tag);
+      actualizarEtiquetas();
+    }
+
+    // Enviar el formulario
+    groupForm.addEventListener('submit', async function (event) {
+      event.preventDefault();
+
+      const email = localStorage.getItem('email');
+      if (!email) {
+        alert('Usuario no autenticado.');
+        return;
+      }
+
+      const name = document.getElementById('group-name').value;
+      const description = document.getElementById('group-description').value;
+      const tags = etiquetas.join(',');
+
+      if (!name) {
+        alert('El nombre del grupo es obligatorio.');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('name', name);
+      formData.append('description', description);
+      formData.append('creatorEmail', email);
+      formData.append('tags', tags);
+      if (groupImageInput.files[0]) {
+        formData.append('imagen', groupImageInput.files[0]);
+      }
+
+      try {
+        const response = await fetch('http://localhost:5000/api/groups/create', {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          alert('Grupo creado con éxito.');
+          window.location.href = `/chatgrupo.html?groupId=${data.groupId}`;
+        } else {
+          alert('Error al crear el grupo: ' + data.message);
+        }
+      } catch (error) {
+        console.error('Error creando grupo:', error);
+        alert('Error del servidor.');
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat de Grupo - AthleticXs</title>
+    <script src="http://localhost:5000/socket.io/socket.io.js"></script>
+    <script src="http://localhost:5000/firebase.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+
+    <style>
+        /* Estilos idénticos a chatusuario.html */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; height: 100vh; display: flex; overflow: hidden; }
+        .sidebar { width: 350px; background: #ffffff; border-right: 1px solid #ddd; height: 100%; overflow-y: auto; box-shadow: 2px 0 10px rgba(0,0,0,0.1); }
+        .search-bar { padding: 20px; border-bottom: 1px solid #eee; position: sticky; top: 0; background: #fff; z-index: 10; }
+        .search-bar input { width: 100%; padding: 12px 15px; border: none; border-radius: 25px; background: #f5f5f5; font-size: 16px; outline: none; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); transition: all 0.3s; }
+        .search-bar input:focus { background: #fff; box-shadow: 0 0 5px rgba(0,123,255,0.5); }
+        .messages-title { padding: 15px 20px; font-size: 24px; color: #333; font-weight: 600; border-bottom: 1px solid #eee; }
+        .group-list { padding: 10px; }
+        .group-item { display: flex; align-items: center; padding: 15px; text-decoration: none; color: #333; border-radius: 10px; margin-bottom: 10px; transition: all 0.3s; background: #fff; cursor: pointer; }
+        .group-item.active { background: #e6f0ff; }
+        .group-item:hover { background: #f0f0f0; transform: translateX(5px); }
+        .avatar { width: 50px; height: 50px; border-radius: 50%; margin-right: 15px; background-size: cover; background-position: center; border: 2px solid #ddd; }
+        .chat-header .avatar { width: 40px; height: 40px; margin-right: 10px; }
+        .group-info { flex: 1; }
+        .group-info h3 { margin: 0; font-size: 18px; font-weight: 500; }
+        .group-info p { margin: 5px 0 0; font-size: 14px; color: #777; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .chat-area { flex: 1; display: flex; flex-direction: column; background: #fff; height: 100%; }
+        .chat-header { padding: 15px 20px; border-bottom: 1px solid #eee; background: #f8f9fa; display: flex; align-items: center; position: sticky; top: 0; z-index: 10; justify-content: space-between; }
+        .chat-header h2 { margin: 0; font-size: 20px; color: #333; font-weight: 500; flex-grow: 1; }
+        .hamburger-menu { position: relative; cursor: pointer; width: 30px; height: 30px; display: flex; flex-direction: column; justify-content: center; gap: 5px; }
+        .hamburger-menu .bar { width: 100%; height: 3px; background: #333; transition: all 0.3s; }
+        .hamburger-menu.active .bar:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+        .hamburger-menu.active .bar:nth-child(2) { opacity: 0; }
+        .hamburger-menu.active .bar:nth-child(3) { transform: rotate(-45deg) translate(7px, -7px); }
+        .menu-dropdown { 
+            display: none; 
+            position: absolute; 
+            top: 50px; 
+            right: 20px; 
+            background: #fff; 
+            border-radius: 10px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
+            z-index: 20; 
+            padding: 10px; 
+            min-width: 150px; 
+        }
+        .menu-dropdown.active { display: block; animation: slideIn 0.3s ease-out; }
+        .menu-dropdown a { 
+            display: flex; 
+            align-items: center; 
+            padding: 10px; 
+            text-decoration: none; 
+            color: #333; 
+            font-size: 16px; 
+            transition: background 0.3s; 
+        }
+        .menu-dropdown a:hover { background: #f0f0f0; border-radius: 5px; }
+        .menu-dropdown img { width: 20px; height: 20px; margin-right: 10px; }
+        .chat-messages { flex: 1; padding: 20px; overflow-y: auto; background: #f0f2f5; }
+        .message { margin-bottom: 15px; display: flex; align-items: flex-start; animation: fadeIn 0.3s; }
+        .message.sent { flex-direction: column; align-items: flex-end; }
+        .message.received { flex-direction: row; }
+        .message .avatar { width: 30px; height: 30px; margin: 0 10px; flex-shrink: 0; }
+        .message-content { display: flex; flex-direction: column; max-width: 60%; position: relative; }
+        .message p { 
+            padding: 10px 15px; 
+            border-radius: 15px; 
+            margin: 2px 0; 
+            font-size: 15px; 
+            line-height: 1.4; 
+            color: #fff; 
+        }
+        .message.sent p { background: #aa1616; }
+        .message.received p { background: #cf5649; }
+        .message img { max-width: 300px; max-height: 300px; object-fit: contain; border-radius: 15px; margin: 2px 0; cursor: pointer; }
+        .message.sent img { border: 2px solid #b41a1a; }
+        .message.received img { border: 2px solid #cf5649; }
+        .message .timestamp { font-size: 12px; color: #777; margin: 2px 0; display: flex; align-items: center; gap: 5px; }
+        .message.sent .timestamp { text-align: right; justify-content: flex-end; }
+        .message .reply-btn { 
+            width: 20px; 
+            height: 20px; 
+            background: url('img/responder.png') no-repeat center; 
+            background-size: contain; 
+            border: none; 
+            cursor: pointer; 
+            transition: transform 0.3s; 
+        }
+        .message .reply-btn:hover { transform: scale(1.1); }
+        .message .reply-ref { 
+            font-size: 12px; 
+            color: #555; 
+            background: rgba(255, 255, 255, 0.8); 
+            padding: 5px 10px; 
+            border-radius: 10px; 
+            margin-bottom: 5px; 
+            max-width: 100%; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            white-space: nowrap; 
+        }
+        .chat-input { padding: 20px; border-top: 1px solid #eee; display: flex; align-items: center; background: #f8f9fa; position: sticky; bottom: 0; z-index: 10; }
+        .chat-input input[type="text"] { flex: 1; padding: 12px 15px; border: none; border-radius: 25px; background: #fff; font-size: 16px; outline: none; margin-right: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: all 0.3s; }
+        .chat-input input[type="text"]:focus { box-shadow: 0 0 5px rgba(0,123,255,0.5); }
+        .chat-input input[type="file"] { display: none; }
+        .chat-input .image-btn { 
+            width: 40px; 
+            height: 40px; 
+            background: url('img/imagen.png') no-repeat center; 
+            background-size: contain; 
+            border: none; 
+            cursor: pointer; 
+            margin-right: 10px; 
+            transition: transform 0.3s; 
+        }
+        .chat-input .image-btn:hover { transform: scale(1.1); }
+        .chat-input .send-btn { 
+            width: 40px; 
+            height: 40px; 
+            background: url('img/enviar.png') no-repeat center; 
+            background-size: contain; 
+            border: none; 
+            cursor: pointer; 
+            transition: transform 0.3s; 
+        }
+        .chat-input .send-btn:hover { transform: scale(1.1); }
+        .image-modal { 
+            display: none; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(0,0,0,0.85); 
+            z-index: 1000; 
+            justify-content: center; 
+            align-items: center; 
+            animation: fadeInModal 0.3s ease-out; 
+            flex-direction: column; 
+            gap: 20px; 
+        }
+        .image-modal img { 
+            max-width: 80%; 
+            max-height: 70%; 
+            border-radius: 15px; 
+            box-shadow: 0 0 20px rgba(0,123,255,0.5); 
+            border: 3px solid #007bff; 
+            transition: transform 0.3s; 
+        }
+        .image-modal img:hover { transform: scale(1.05); }
+        .image-modal .close-btn { 
+            position: absolute; 
+            top: 20px; 
+            right: 20px; 
+            background: #dc3545; 
+            color: white; 
+            border: none; 
+            border-radius: 50%; 
+            width: 40px; 
+            height: 40px; 
+            font-size: 20px; 
+            cursor: pointer; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3); 
+            transition: all 0.3s; 
+        }
+        .image-modal .close-btn:hover { 
+            background: #c82333; 
+            transform: scale(1.1) rotate(90deg); 
+        }
+        .image-modal .send-image-btn { 
+            padding: 12px 25px; 
+            border: none; 
+            background: #8B0000; 
+            color: white; 
+            border-radius: 25px; 
+            font-size: 16px; 
+            cursor: pointer; 
+            transition: all 0.3s; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3); 
+        }
+        .image-modal .send-image-btn:hover { 
+            background: #6B0000; 
+            transform: scale(1.05); 
+        }
+        .image-modal.preview-only .send-image-btn { display: none; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInModal { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Buscar grupo...">
+        </div>
+        <h2 class="messages-title">Grupos</h2>
+        <div class="group-list" id="groupList"></div>
+    </div>
+    <div class="chat-area">
+        <div class="chat-header">
+            <div class="avatar" id="groupAvatar"></div>
+            <h2 id="groupTitle">Cargando...</h2>
+            <div class="hamburger-menu" id="hamburgerMenu">
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+            </div>
+            <div class="menu-dropdown" id="menuDropdown"></div>
+        </div>
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="chat-input">
+            <input type="file" id="imageInput" accept="image/*">
+            <button class="image-btn" onclick="document.getElementById('imageInput').click()"></button>
+            <input type="text" id="messageInput" placeholder="Escribe un mensaje...">
+            <button class="send-btn" id="sendButton"></button>
+        </div>
+    </div>
+    <div class="image-modal" id="imageModal">
+        <img id="modalImage" src="" alt="Vista previa">
+        <button class="close-btn" id="closeModal">✖</button>
+        <button class="send-image-btn" id="sendImageButton">Enviar</button>
+    </div>
+
+    <script>
+        // Cargar Socket.IO y Firebase
+        const socket = io('http://localhost:5000');
+        let currentUserId = localStorage.getItem('userId');
+        const groupId = new URLSearchParams(window.location.search).get('groupId');
+        let isCreator = false;
+        const displayedMessages = new Set();
+        let selectedFile = null;
+        let userProfiles = {};
+    
+        // Inicializar Firebase
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!currentUserId || !groupId) {
+                alert('Usuario o grupo no identificado');
+                window.location.href = 'registro.html';
+                return;
+            }
+    
+            // Inicializar Firebase
+            const firebaseConfig = window.firebaseConfig;
+            if (typeof firebase !== 'undefined') {
+                firebase.initializeApp(firebaseConfig);
+            } else {
+                console.error('Firebase no está cargado correctamente');
+                alert('Error al cargar Firebase. Revisa la configuración.');
+                return;
+            }
+    
+            socket.emit('joinGroup', groupId);
+            await loadSidebar();
+            await loadGroupChat();
+            setupMenu();
+    
+            const hamburgerMenu = document.getElementById('hamburgerMenu');
+            const menuDropdown = document.getElementById('menuDropdown');
+            hamburgerMenu.addEventListener('click', () => {
+                hamburgerMenu.classList.toggle('active');
+                menuDropdown.classList.toggle('active');
+            });
+        });
+    
+        async function loadSidebar() {
+            const groupList = document.getElementById('groupList');
+            try {
+                const response = await fetch(`http://localhost:5000/api/groups/${currentUserId}`);
+                const groups = await response.json();
+    
+                groupList.innerHTML = '';
+                groups.forEach(group => {
+                    const groupItem = document.createElement('a');
+                    groupItem.className = `group-item ${group._id === groupId ? 'active' : ''}`;
+                    groupItem.href = `/chatgrupo.html?groupId=${group._id}`;
+                    groupItem.innerHTML = `
+                        <div class="avatar" style="background-image: url(${group.image || '/default-group.png'});"></div>
+                        <div class="group-info">
+                            <h3>${group.name}</h3>
+                            <p>Último mensaje</p>
+                        </div>
+                    `;
+                    groupList.appendChild(groupItem);
+                });
+    
+                document.getElementById('searchInput').addEventListener('input', async function() {
+                    const filter = this.value.toLowerCase();
+                    const allGroupsResponse = await fetch('http://localhost:5000/api/groups');
+                    const allGroups = await allGroupsResponse.json();
+    
+                    groupList.innerHTML = '';
+                    const filteredGroups = allGroups.filter(group => 
+                        group.name.toLowerCase().includes(filter) && 
+                        !groups.some(g => g._id === group._id)
+                    );
+    
+                    filteredGroups.forEach(group => {
+                        const groupItem = document.createElement('a');
+                        groupItem.className = 'group-item';
+                        groupItem.href = `/chatgrupo.html?groupId=${group._id}`;
+                        groupItem.innerHTML = `
+                            <div class="avatar" style="background-image: url(${group.image || '/default-group.png'});"></div>
+                            <div class="group-info">
+                                <h3>${group.name}</h3>
+                                <p>Último mensaje</p>
+                            </div>
+                        `;
+                        groupList.appendChild(groupItem);
+                    });
+    
+                    groups.forEach(group => {
+                        if (group.name.toLowerCase().includes(filter)) {
+                            const groupItem = document.createElement('a');
+                            groupItem.className = `group-item ${group._id === groupId ? 'active' : ''}`;
+                            groupItem.href = `/chatgrupo.html?groupId=${group._id}`;
+                            groupItem.innerHTML = `
+                                <div class="avatar" style="background-image: url(${group.image || '/default-group.png'});"></div>
+                                <div class="group-info">
+                                    <h3>${group.name}</h3>
+                                    <p>Último mensaje</p>
+                                </div>
+                            `;
+                            groupList.appendChild(groupItem);
+                        }
+                    });
+    
+                    if (groupList.children.length === 0) {
+                        groupList.innerHTML = '<div class="loading">No se encontraron grupos</div>';
+                    }
+                });
+            } catch (error) {
+                console.error('Error cargando grupos:', error);
+                groupList.innerHTML = `<div class="loading">Error: ${error.message}</div>`;
+            }
+        }
+    
+        async function loadGroupChat() {
+            try {
+                const response = await fetch(`http://localhost:5000/api/groups/id/${groupId}`); // Cambiar a /id/:groupId
+                const groupData = await response.json();
+    
+                if (!groupData || Object.keys(groupData).length === 0) {
+                    document.getElementById('groupTitle').textContent = 'Grupo no encontrado';
+                    return;
+                }
+    
+                isCreator = groupData.creatorId === currentUserId;
+                document.getElementById('groupTitle').textContent = groupData.name;
+                document.getElementById('groupAvatar').style.backgroundImage = `url(${groupData.image || '/default-group.png'})`;
+    
+                // Cargar mensajes (simulado con socket por ahora)
+                socket.on('newGroupMessage', (message) => {
+                    if (!displayedMessages.has(message.id)) {
+                        addMessageToChat(message);
+                        displayedMessages.add(message.id);
+                    }
+                });
+            } catch (error) {
+                console.error('Error cargando grupo:', error);
+                document.getElementById('groupTitle').textContent = 'Grupo no encontrado';
+            }
+        }
+    
+        function setupMenu() {
+            const menuDropdown = document.getElementById('menuDropdown');
+            menuDropdown.innerHTML = isCreator ? `
+                <a href="#" onclick="editGroup(); return false;">
+                    <img src="img/editar.png" alt="Editar"> Editar grupo
+                </a>
+                <a href="#" onclick="deleteGroup(); return false;">
+                    <img src="img/eliminar.png" alt="Eliminar"> Eliminar grupo
+                </a>
+                <a href="#" onclick="viewMembers(); return false;">
+                    <img src="img/miembros.png" alt="Miembros"> Ver miembros
+                </a>
+                <a href="#" onclick="openGroupFiles(); return false;">
+                    <img src="img/archivos.png" alt="Archivos"> Archivos
+                </a>
+            ` : `
+                <a href="#" onclick="openGroupFiles(); return false;">
+                    <img src="img/archivos.png" alt="Archivos"> Archivos
+                </a>
+                <a href="#" onclick="viewMembers(); return false;">
+                    <img src="img/miembros.png" alt="Miembros"> Ver miembros
+                </a>
+                <a href="#" onclick="reportGroup(); return false;">
+                    <img src="img/reportar.png" alt="Reportar"> Reportar
+                </a>
+            `;
+        }
+    
+        async function addMessageToChat(message) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            const isSent = message.senderId === currentUserId;
+            messageDiv.className = `message ${isSent ? 'sent' : 'received'}`;
+            messageDiv.dataset.msgId = message.id || Date.now(); // Temporal hasta que tengas IDs reales
+    
+            if (!userProfiles[message.senderId]) {
+                const userResponse = await fetch(`http://localhost:5000/api/users/${message.senderId}`);
+                const user = await userResponse.json();
+                userProfiles[message.senderId] = { fotoPerfil: user.fotoPerfil || '/default-avatar.png' };
+            }
+            const profilePic = userProfiles[message.senderId]?.fotoPerfil || '/default-avatar.png';
+    
+            messageDiv.innerHTML = isSent ? `
+                <div class="message-content">
+                    ${message.imageUrl ? 
+                        `<img src="${message.imageUrl}" alt="Imagen" onclick="showImageModal(this.src)">` : 
+                        `<p>${message.content}</p>`}
+                    <span class="timestamp">
+                        ${new Date(message.timestamp || Date.now()).toLocaleTimeString()}
+                    </span>
+                </div>
+            ` : `
+                <div class="avatar" style="background-image: url(${profilePic});"></div>
+                <div class="message-content">
+                    ${message.imageUrl ? 
+                        `<img src="${message.imageUrl}" alt="Imagen" onclick="showImageModal(this.src)">` : 
+                        `<p>${message.content}</p>`}
+                    <span class="timestamp">
+                        ${new Date(message.timestamp || Date.now()).toLocaleTimeString()}
+                    </span>
+                </div>
+            `;
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+    
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const imageInput = document.getElementById('imageInput');
+        const imageModal = document.getElementById('imageModal');
+        const modalImage = document.getElementById('modalImage');
+        const closeModal = document.getElementById('closeModal');
+        const sendImageButton = document.getElementById('sendImageButton');
+    
+        sendButton.addEventListener('click', sendTextMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendTextMessage();
+        });
+        imageInput.addEventListener('change', previewImage);
+        closeModal.addEventListener('click', clearImagePreview);
+        sendImageButton.addEventListener('click', sendImageMessage);
+    
+        function previewImage() {
+            selectedFile = imageInput.files[0];
+            if (selectedFile) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    modalImage.src = e.target.result;
+                    imageModal.style.display = 'flex';
+                    imageModal.classList.remove('preview-only');
+                };
+                reader.readAsDataURL(selectedFile);
+            }
+        }
+    
+        function clearImagePreview() {
+            imageModal.style.display = 'none';
+            imageInput.value = '';
+            selectedFile = null;
+            imageModal.classList.remove('preview-only');
+        }
+    
+        function showImageModal(imageSrc) {
+            modalImage.src = imageSrc;
+            imageModal.style.display = 'flex';
+            imageModal.classList.add('preview-only');
+        }
+    
+        async function sendTextMessage() {
+            const content = messageInput.value.trim();
+            if (!content || !groupId) return;
+    
+            socket.emit('sendGroupMessage', { groupId, senderId: currentUserId, content, timestamp: new Date().toISOString() });
+            messageInput.value = '';
+        }
+    
+        async function sendImageMessage() {
+            if (!selectedFile || !groupId) return;
+    
+            const storageRef = firebase.storage().ref(`group_images/${groupId}/${Date.now()}_${selectedFile.name}`);
+            const uploadTask = storageRef.put(selectedFile);
+    
+            uploadTask.on('state_changed',
+                (snapshot) => {
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    console.log(`📤 Progreso de subida: ${progress}%`);
+                },
+                (error) => {
+                    console.error('❌ Error durante la subida:', error);
+                    alert('Error al subir la imagen');
+                },
+                async () => {
+                    const imageUrl = await storageRef.getDownloadURL();
+                    socket.emit('sendGroupMessage', { groupId, senderId: currentUserId, imageUrl, timestamp: new Date().toISOString() });
+                    clearImagePreview();
+                }
+            );
+        }
+    
+        function editGroup() { alert('Función en desarrollo'); }
+        async function deleteGroup() {
+            if (confirm('¿Seguro que quieres eliminar este grupo?')) {
+                await fetch(`http://localhost:5000/api/groups/${groupId}/delete`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ creatorId: currentUserId })
+                });
+                window.location.href = 'grupo.html';
+            }
+        }
+        function viewMembers() { window.location.href = `/miembros.html?groupId=${groupId}`; }
+        function openGroupFiles() { window.location.href = `/archivosgrupo.html?groupId=${groupId}`; }
+        function reportGroup() { alert('Función en desarrollo'); }
+    </script>
+</body>
+</html>
