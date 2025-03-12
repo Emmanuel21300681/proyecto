@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archivos del Chat - AthleticXs</title>
+    <script src="http://localhost:5000/firebase.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            background: linear-gradient(135deg, #7c0e0e 0%, #b32929 100%); 
+            min-height: 100vh; 
+            padding: 40px; 
+            overflow-x: hidden; 
+            color: #fff; 
+        }
+        h1 { 
+            font-size: 42px; 
+            color: #ffffff; 
+            margin-bottom: 40px; 
+            text-align: center; 
+            text-shadow: 0 3px 6px rgba(0, 0, 0, 0.5); 
+            animation: glow 2s infinite alternate; 
+        }
+        .image-gallery { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+            gap: 25px; 
+            max-width: 1300px; 
+            margin: 0 auto; 
+        }
+        .image-item { 
+            background: rgba(255, 255, 255, 0.05); 
+            border-radius: 20px; 
+            overflow: hidden; 
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4); 
+            transition: transform 0.3s ease, box-shadow 0.3s ease; 
+            animation: fadeInUp 0.5s ease-out forwards; 
+            backdrop-filter: blur(5px); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+        }
+        .image-item:hover { 
+            transform: translateY(-15px); 
+            box-shadow: 0 12px 30px rgba(233, 69, 96, 0.5); 
+        }
+        .image-item img { 
+            width: 100%; 
+            height: 220px; 
+            object-fit: cover; 
+            cursor: pointer; 
+            border-bottom: 3px solid #e94560; 
+            transition: transform 0.3s ease; 
+        }
+        .image-item img:hover { 
+            transform: scale(1.08); 
+        }
+        .image-info { 
+            padding: 15px; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            background: rgba(255, 255, 255, 0.1); 
+        }
+        .image-info .avatar { 
+            width: 35px; 
+            height: 35px; 
+            border-radius: 50%; 
+            background-size: cover; 
+            background-position: center; 
+            border: 2px solid #e94560; 
+            flex-shrink: 0; 
+        }
+        .image-info .user-details { 
+            flex: 1; 
+        }
+        .image-info .username { 
+            font-size: 16px; 
+            font-weight: 600; 
+            color: #fff; 
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3); 
+        }
+        .image-info .timestamp { 
+            font-size: 12px; 
+            color: #b0b0b0; 
+        }
+        .no-images { 
+            text-align: center; 
+            font-size: 20px; 
+            color: #b0b0b0; 
+            padding: 30px; 
+            background: rgba(255, 255, 255, 0.05); 
+            border-radius: 15px; 
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); 
+            margin: 0 auto; 
+            max-width: 500px; 
+            animation: fadeIn 0.5s ease-out; 
+        }
+        @keyframes fadeInDown { 
+            from { opacity: 0; transform: translateY(-20px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        @keyframes fadeInUp { 
+            from { opacity: 0; transform: translateY(20px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        @keyframes fadeIn { 
+            from { opacity: 0; } 
+            to { opacity: 1; } 
+        }
+        @keyframes glow { 
+            from { text-shadow: 0 3px 6px rgba(233, 69, 96, 0.5); } 
+            to { text-shadow: 0 3px 12px rgba(233, 69, 96, 0.9); } 
+        }
+    </style>
+</head>
+<body>
+    <h1>Archivos del Chat</h1>
+    <div class="image-gallery" id="imageGallery"></div>
+
+    <script>
+        firebase.initializeApp(window.firebaseConfig);
+        const db = firebase.firestore();
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const chatId = urlParams.get('chatId');
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!chatId) {
+                document.body.innerHTML = '<h1>No se especificó un chat</h1>';
+                return;
+            }
+
+            try {
+                const messagesSnapshot = await db.collection('chats').doc(chatId).collection('messages')
+                    .orderBy('timestamp')
+                    .get();
+                
+                const imageGallery = document.getElementById('imageGallery');
+                imageGallery.innerHTML = '';
+
+                let hasImages = false;
+                let userCache = {};
+
+                messagesSnapshot.forEach(async (doc, index) => {
+                    const msg = doc.data();
+                    if (msg.imageUrl) {
+                        hasImages = true;
+
+                        // Obtener datos del usuario
+                        let username = 'Usuario desconocido';
+                        let fotoPerfil = 'img/default-avatar.png';
+                        if (!userCache[msg.senderId]) {
+                            const userResponse = await fetch(`http://localhost:5000/api/users/${msg.senderId}`);
+                            if (userResponse.ok) {
+                                const userData = await userResponse.json();
+                                username = userData.username || username;
+                                fotoPerfil = userData.fotoPerfil || fotoPerfil;
+                                userCache[msg.senderId] = { username, fotoPerfil };
+                            }
+                        } else {
+                            username = userCache[msg.senderId].username;
+                            fotoPerfil = userCache[msg.senderId].fotoPerfil;
+                        }
+
+                        const imageItem = document.createElement('div');
+                        imageItem.className = 'image-item';
+                        imageItem.style.animationDelay = `${index * 0.1}s`;
+                        imageItem.innerHTML = `
+                            <img src="${msg.imageUrl}" alt="Imagen" onclick="window.open(this.src, '_blank')">
+                            <div class="image-info">
+                                <div class="avatar" style="background-image: url(${fotoPerfil});"></div>
+                                <div class="user-details">
+                                    <div class="username">${username}</div>
+                                    <div class="timestamp">${new Date(msg.timestamp).toLocaleString()}</div>
+                                </div>
+                            </div>
+                        `;
+                        imageGallery.appendChild(imageItem);
+                    }
+                });
+
+                // Esperar un momento para asegurarnos de que se procesaron todos los mensajes
+                setTimeout(() => {
+                    if (!hasImages) {
+                        imageGallery.innerHTML = '<p class="no-images">No hay imágenes en este chat.</p>';
+                    }
+                }, 500);
+            } catch (error) {
+                console.error('Error cargando imágenes:', error);
+                document.getElementById('imageGallery').innerHTML = '<p class="no-images">Error al cargar las imágenes.</p>';
+            }
+        });
+    </script>
+</body>
+</html>
